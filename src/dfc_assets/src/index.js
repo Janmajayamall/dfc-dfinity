@@ -10,3 +10,18 @@ document.getElementById("clickMeBtn").addEventListener("click", async () => {
 
   document.getElementById("greeting").innerText = greeting;
 });
+
+
+    // "dfc_assets": {
+    //   "dependencies": [
+    //     "dfc"
+    //   ],
+    //   "frontend": {
+    //     "entrypoint": "src/dfc_assets/src/index.html"
+    //   },
+    //   "source": [
+    //     "src/dfc_assets/assets",
+    //     "dist/dfc_assets/"
+    //   ],
+    //   "type": "assets"
+    // }

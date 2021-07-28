@@ -1,0 +1,5 @@
+ dfx canister call dfc createProfile '("newUser")'
+ dfx canister call dfc flagContent '(variant {twitter},"129109103")'
+ dfx canister call dfc addComment '("0", "this is the comment")'
+ dfx canister call dfc getAllComments '("0")'
+ dfx canister call dfc addRating '("0", true)'
