@@ -48,6 +48,14 @@ actor {
         username: Text;
     };
 
+
+    public type Feed = {
+        contentId: ContentId;
+        content: Content;
+        comments: [Comment];
+        ratings2d: [[Rating]];
+    };
+
     let usersMap = HashMap.HashMap<UserId, User>(1, func (x, y) {x==y;}, Principal.hash);
     let contentsMap = HashMap.HashMap<ContentId, Content>(1, Text.equal, Text.hash);
     let contentCommentsMap = HashMap.HashMap<ContentId, CommentHashMap>(1, Text.equal, Text.hash);
@@ -64,11 +72,42 @@ actor {
         contentsMap.get(contentId);
     };
 
-    func findComment(contentId: ContentId, commentId: CommentId): async ?Comment {
+    func findComment(contentId: ContentId, commentId: CommentId): ?Comment {
         let comments = Option.unwrap(contentCommentsMap.get(contentId));
         comments.get(commentId);
     };
 
+    func findAllContents(): [Content] {
+         var contentArray: [Content] = [];
+
+        for ((id, content) in contentsMap.entries()) {
+            contentArray := Array.append<Content>(contentArray, [content]);
+        };
+
+        return contentArray;
+    };
+
+    func findAllComments(contentId: ContentId): [Comment] {
+        var commentsMap = Option.unwrap(contentCommentsMap.get(contentId));
+
+        var commentArray: [Comment] = [];
+        for ((id, comment) in commentsMap.entries()) {
+            commentArray := Array.append<Comment>(commentArray, [comment]);
+        };
+
+        return commentArray;
+    };
+
+    func findAllRatings(commentId: CommentId): [Rating] {
+        var ratingsMap = Option.unwrap(commentRatingsMap.get(commentId));
+
+        var ratingArray: [Rating] = [];
+        for((id, rating) in ratingsMap.entries()) {
+            ratingArray := Array.append<Rating>(ratingArray, [rating]);
+        };
+
+        return ratingArray
+    };
 
     // shared functions
     public shared (msg) func createProfile(username: Text): async () {
@@ -83,36 +122,39 @@ actor {
         findUser(msg.caller);
     };
 
-    public shared query (msg) func getAllContent() : async [Content] {
-        var contentArray: [Content] = [];
-
-        for ((id, content) in contentsMap.entries()) {
-            contentArray := Array.append<Content>(contentArray, [content]);
-        };
-
-        return contentArray;
+    public shared query (msg) func getAllContents() : async [Content] {
+        findAllContents();
     };
 
     public shared query (msg) func getAllComments(contentId: ContentId): async [Comment] {
-        var commentsMap = Option.unwrap(contentCommentsMap.get(contentId));
-
-        var commentArray: [Comment] = [];
-        for ((id, comment) in commentsMap.entries()) {
-            commentArray := Array.append<Comment>(commentArray, [comment]);
-        };
-
-        return commentArray;
+        findAllComments(contentId);
     };
 
     public shared query (msg) func getAllRatings(commentId: CommentId): async [Rating] {
-        var ratingsMap = Option.unwrap(commentRatingsMap.get(commentId));
+        findAllRatings(commentId);
+    };
 
-        var ratingArray: [Rating] = [];
-        for((id, rating) in ratingsMap.entries()) {
-            ratingArray := Array.append<Rating>(ratingArray, [rating]);
+    public shared query (msg) func getFeed(): async [Feed] {
+        var feedArray : [Feed] = [];
+
+        let contents = findAllContents();
+        for (content in contents.vals()){
+            let comments = findAllComments(content.id);
+            var ratings2d: [[Rating]] = [];
+            for (comment in comments.vals()) {
+                let commentRatings = findAllRatings(comment.id);
+                ratings2d := Array.append<[Rating]>(ratings2d, [commentRatings]);
+            };
+            let feedItem: Feed = {
+                contentId = content.id;
+                content = content;
+                comments = comments;
+                ratings2d = ratings2d;
+            };
+            feedArray := Array.append<Feed>(feedArray, [feedItem]);
         };
 
-        return ratingArray
+        return feedArray
     };
 
     public shared (msg) func flagContent(site: Site, postId: Text) : async () {
@@ -183,10 +225,6 @@ actor {
         });
     };
 
-
-    public func greet(name : Text) : async Text {
-        return "Hello, " # name # "!";
-    };
 
     func isEqUserId(x: UserId, y: UserId): Bool {
         x == y;
