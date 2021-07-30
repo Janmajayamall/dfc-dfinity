@@ -184,7 +184,7 @@ actor {
         contentCommentsMap.put(contentId, HashMap.HashMap<CommentId, Comment>(1, Text.equal, Text.hash));
     };
 
-    public shared (msg) func addComment(contentId: ContentId, comment: Text) : async () {
+    public shared (msg) func addComment(contentId: ContentId, comment: Text) : async Comment {
         // check user
         let user = Option.unwrap(findUser(msg.caller));
         
@@ -194,16 +194,19 @@ actor {
         // a new comment
         let newCommentId: Text = Nat.toText(commentIdCount);
         commentIdCount += 1;
-        comments.put(newCommentId, {
+        let newComment: Comment = {
             id = newCommentId;
             contentId = contentId;
             text = comment;
             user = user;
             createdAt = Time.now();
-        });
+        };
+        comments.put(newCommentId, newComment);
 
         // insert commment rating map
         commentRatingsMap.put(newCommentId, HashMap.HashMap<RatingId, Rating>(1, Text.equal, Text.hash));
+
+        return newComment;
     };
 
     public shared (msg) func addRating(commentId: CommentId, ratingValue: Bool): async () {

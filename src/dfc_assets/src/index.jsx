@@ -1,244 +1,98 @@
 import * as React from "react";
 import { render } from "react-dom";
-import TweetEmbed from "react-tweet-embed";
-import Card from "@material-ui/core/Card";
-import Paper from "@material-ui/core/Paper";
+import FeedItem from "./components/FeedItem";
+import { addComment, getFeed } from "./dfx_canister_calls";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
-import Button from "@material-ui/core/Button";
-// import { dfc } from "../../declarations/dfc";
-import { Actor, HttpAgent } from "@dfinity/agent";
-import { idlFactory as dfc_idl, canisterId as dfc_id } from "dfx-generated/dfc";
+import { ProfileModal } from "./components/ProfileModal";
+import IconButton from "@material-ui/core/IconButton";
+import PersonIcon from "@material-ui/icons/Person";
+import AddIcon from "@material-ui/icons/Add";
+import Fab from "@material-ui/core/Fab";
+import { NewContentModal } from "./components/NewContentModal";
 
-const agent = new HttpAgent();
-const dfc = Actor.createActor(dfc_idl, { agent, canisterId: dfc_id });
-
-const dummyFeed = [
-	{
-		comments: [
-			{
-				id: "0",
-				contentId: "0",
-				createdAt: 1627592149940225000n,
-				text: "this is the comment",
-				user: { username: "newUser1" },
-			},
-		],
-		content: {
-			contentIdentification: {
-				postId: "1410462056495542277",
-				site: { twitter: null },
-			},
-			createdAt: 1627592144734283000n,
-			id: "1",
-		},
-		user: { username: "newUser" },
-		contentId: "1",
-		ratings2d: [
-			[
-				{
-					id: "lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae+0",
-					commentId: "0",
-					ratingValue: true,
-					user: { username: "dawda" },
-				},
-			],
-		],
-	},
-	{
-		comments: [
-			{
-				id: "0",
-				contentId: "0",
-				createdAt: 1627592149940225000n,
-				text: "this is the comment",
-				user: { username: "newUser2" },
-			},
-		],
-		content: {
-			contentIdentification: {
-				postId: "1410462056495542277",
-				site: { twitter: null },
-			},
-			createdAt: 1627592144734283000n,
-			id: "1",
-		},
-		user: { username: "newUser3" },
-		contentId: "1",
-		ratings2d: [
-			[
-				{
-					id: "lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae+0",
-					commentId: "0",
-					ratingValue: false,
-					user: { username: "dawda" },
-				},
-			],
-		],
-	},
-];
-
-const FeedItem = ({ user, feedItem, addNewComment }) => {
-	const [newComment, setNewComment] = React.useState("");
-
-	return (
-		<Card style={{ padding: 10, maxWidth: 520 }}>
-			<TweetEmbed
-				id={feedItem.content.contentIdentification.postId}
-				options={{ align: "center" }}
-			/>
-			<div>
-				{feedItem.comments.map((comment) => {
-					return <Comment user={user} comment={comment} />;
-				})}
-				<div
-					style={{
-						display: "flex",
-						flexDirection: "column",
-					}}
-				>
-					<TextField
-						multiline
-						InputProps={{ disableUnderline: true }}
-						placeholder="Your Comment!"
-						variant="filled"
-						onChange={(e) => {
-							setNewComment(e.target.value);
-						}}
-						value={newComment}
-						style={{ width: "100%", fontSize: 16 }}
-					/>
-					<Button
-						variant="contained"
-						color="primary"
-						onClick={() => {
-							if (newComment === "") {
-								return;
-							}
-							addNewComment(feedItem.contentId, newComment);
-							setNewComment("");
-						}}
-					>
-						Post
-					</Button>
-				</div>
-			</div>
-		</Card>
-	);
-};
-
-const Comment = ({ user, comment, ratings }) => {
-	const [upRates, setUpRates] = React.useState(0);
-	const [downRates, setDownRates] = React.useState(0);
-	const [userRate, setUserRate] = React.useState(null); // null = no rate, true = up rate, false = down rate
-
-	React.useEffect(() => {
-		ratings.forEach(function (rating) {
-			if (rating.user.id === user.id) {
-				setUserRate(rating.user.ratingValue);
-			}
-		});
-	}, []);
-
-	function changeRatingHelper(rating) {
-		if (rating === userRate) {
-			return;
-		}
-	}
-
-	return (
-		<Paper
-			elevation={0}
-			style={{
-				display: "flex",
-				flexDirection: "row",
-			}}
-		>
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<div
-					style={{
-						display: "flex",
-						flexDirection: "column",
-						justContent: "center",
-					}}
-				>
-					<ArrowUpward color="primary" />
-					<Typography variant="body2">10</Typography>
-				</div>
-				<div
-					style={{
-						display: "flex",
-						flexDirection: "column",
-					}}
-				>
-					<Typography variant="body2">10</Typography>
-					<ArrowDownward color="primary" />
-				</div>
-			</div>
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Typography variant="body2">{comment.user.username}</Typography>
-				<Typography variant="body2">{comment.text}</Typography>
-			</div>
-		</Paper>
-	);
-};
-
-const App = () => {
+const Feed = () => {
 	const [feed, setFeed] = React.useState([]);
 	const [user, setUser] = React.useState({
-		id: "1212",
+		id: 1,
 		username: "this is username",
 	});
+	const [toggleUpdate, setToggleUpdate] = React.useState(true);
+	const [profileModalState, setProfileModalState] = React.useState(false);
+	const [newContentModalState, setNewContentModalState] =
+		React.useState(false);
 
-	React.useEffect(() => {
-		getFeed();
+	React.useEffect(async () => {
+		const feed = await getFeed();
+		setFeed(feed);
 	}, []);
 
-	async function getFeed() {
+	async function addNewComment(contentId, commentText) {
+		// handle optimistic update
+		let fakeId = "100000000";
+		handleAddNewComment(
+			contentId,
+			{
+				id: fakeId,
+				contentId: contentId,
+				createdAt: 1627592149940225000n,
+				text: commentText,
+				user: { username: "newUser1" },
+			},
+			true
+		);
+
+		// canister call
 		try {
-			let feed = await dfc.getFeed();
-			console.log(feed);
-			setFeed(feed);
+			const addedComment = await addComment(contentId, commentText);
+
+			// undo optimistic update
+			handleAddNewComment(addedComment, false);
 		} catch (e) {
-			setFeed(dummyFeed);
 			console.log(e);
 		}
 	}
 
-	function addNewComment(contentId, commentText) {
+	async function handleAddNewComment(
+		contentId,
+		newCommentObj,
+		optimisticUpdate
+	) {
+		let fakeId = "100000000";
 		let updatedFeed = [];
 		feed.forEach(function (feedItem) {
 			if (feedItem.contentId === contentId) {
-				let comments = [
-					...feedItem.comments,
-					{
-						id: "100000000",
-						contentId: contentId,
-						createdAt: 1627592149940225000n,
-						text: commentText,
-						user: { username: "newUser1" },
-					},
-				];
-				updatedFeed.push({
+				// handle comment updated
+				let comments = [];
+				if (optimisticUpdate === true) {
+					comments = [...feedItem.comments, newCommentObj];
+				} else {
+					let oldComments = feedItem.comments.filter((comment) => {
+						return comment.id !== fakeId;
+					});
+					comments = [...oldComments, newCommentObj];
+				}
+
+				let updatedFeedItem = {
 					...feedItem,
 					comments: comments,
-				});
+				};
+
+				// handle rating2d update
+				if (optimisticUpdate === true) {
+					updatedFeedItem = {
+						...updatedFeedItem,
+						ratings2d: [...feedItem.ratings2d, []],
+					};
+				}
+
+				updatedFeed.push(updatedFeedItem);
 			} else {
 				updatedFeed.push(feedItem);
 			}
 		});
-		console.log(updatedFeed, "comments updated");
 		setFeed(updatedFeed);
 	}
 
@@ -251,75 +105,110 @@ const App = () => {
 				feedItem.comments.forEach(function (comment, index) {
 					if (comment.id === commentId) {
 						// check user's existing rating
-						let existingRating = comment.ratings2d[index].find(
-							(rating) => {
-								return rating.user.id === user.id;
-							}
+						var newRatings = feedItem.ratings2d[index].filter(
+							(rating) => rating.user.id !== user.id
 						);
 
-						// if existing rating matches incoming rating, then return
-						if (existingRating === rating) {
-							return;
-						}
+						newRatings.push({
+							id: "lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae+0",
+							commentId: commentId,
+							ratingValue: rating,
+							user: {
+								id: user.id,
+								username: user.username,
+							},
+						});
 
-						var ratings = [];
-						if (existingRating == undefined) {
-							// rating did not exists, thus add new one
-							ratings = [
-								...comment.ratings2d[index],
-								{
-									id: "lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae+0",
-									commentId: "0",
-									ratingValue: rating,
-									user: { username: "dawda" },
-								},
-							];
-						} else {
-							// rating exists, flip it
-							comment.ratings2d[index].forEach((val) => {
-								if (val.user.id === user.id) {
-									ratings.push({
-										...val,
-										ratingValue: rating,
-									});
-								} else {
-									ratings.push(val);
-								}
-							});
-						}
-
-						// finish
-						ratings2d.push(ratings);
+						ratings2d.push(newRatings);
 					} else {
-						ratings2d.push(comment.ratings2d);
+						ratings2d.push(feedItem.ratings2d[index]);
 					}
 					comments.push(comment);
 				});
 				updatedFeed.push({
-					...feed,
+					...feedItem,
 					comments: comments,
+					ratings2d: ratings2d,
 				});
 			} else {
 				updatedFeed.push(feedItem);
 			}
 		});
+		setFeed(updatedFeed);
+		setToggleUpdate(!toggleUpdate);
+	}
+
+	function toggleProfileModal() {
+		setProfileModalState(!profileModalState);
+	}
+
+	function toggleNewContentModal() {
+		setNewContentModalState(!newContentModalState);
 	}
 
 	return (
-		<div style={{ fontSize: "30px" }}>
-			<div style={{ backgroundColor: "black" }}>
-				<div>
-					{feed.map((feedItem) => (
-						<FeedItem
-							user={user}
-							feedItem={feedItem}
-							addNewComment={addNewComment}
-						/>
-					))}
-				</div>
+		<div style={{ flex: 1 }}>
+			<AppBar position="static">
+				<Toolbar
+					style={{ display: "flex", justifyContent: "flex-end" }}
+				>
+					<IconButton
+						onClick={() => {
+							toggleProfileModal();
+						}}
+					>
+						<PersonIcon />
+					</IconButton>
+				</Toolbar>
+			</AppBar>
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					width: "100%",
+				}}
+			>
+				{feed.map((feedItem) => (
+					<FeedItem
+						user={user}
+						feedItem={feedItem}
+						addNewComment={addNewComment}
+						changeRating={changeRating}
+					/>
+				))}
 			</div>
+			<Fab
+				style={{
+					position: "fixed",
+					bottom: 10,
+					right: 10,
+				}}
+				color="primary"
+				aria-label="add"
+				onClick={() => {
+					toggleNewContentModal();
+				}}
+			>
+				<AddIcon />
+			</Fab>
+			<ProfileModal
+				user={user}
+				open={profileModalState}
+				handleClose={toggleProfileModal}
+			/>
+			<NewContentModal
+				user={user}
+				open={newContentModalState}
+				handleClose={toggleNewContentModal}
+			/>
 		</div>
 	);
+};
+
+const App = () => {
+	const [pageState, setPageState] = React.useState(0);
+	return <Feed />;
 };
 
 render(<App />, document.getElementById("app"));
