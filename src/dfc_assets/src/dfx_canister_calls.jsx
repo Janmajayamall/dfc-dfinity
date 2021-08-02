@@ -30,9 +30,8 @@ export async function lookupUser() {
 		let user = await dfc.lookupUser();
 		if (user) {
 			return user;
-		} else {
-			throw Error("No user with user id");
 		}
+		throw new Error("No user with user id");
 	} catch (e) {
 		// return default user for dev
 		return {

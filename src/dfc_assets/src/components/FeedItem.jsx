@@ -28,6 +28,22 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 			elevation={14}
 			variant="outlined"
 		>
+			<div
+				style={{
+					width: "100%",
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "flex-end",
+				}}
+			>
+				<Typography
+					variant="body2"
+					style={{
+						color: colorScheme.textPrimary,
+						fontWeight: "bold",
+					}}
+				>{`Tokens burnt - ${feedItem.content.burntTokens}`}</Typography>
+			</div>
 			<TweetEmbed
 				id={feedItem.content.contentIdentification.postId}
 				options={{
@@ -52,7 +68,7 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 					style={{
 						display: "flex",
 						flexDirection: "column",
-						marginTop:10
+						marginTop: 10,
 					}}
 				>
 					<TextField

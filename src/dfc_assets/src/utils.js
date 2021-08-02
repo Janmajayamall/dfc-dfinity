@@ -16,8 +16,9 @@ export const dummyFeed = [
 			},
 			createdAt: 1627592144734283000n,
 			id: "1",
+			user: { id: "0", username: "newUser" },
+			burntTokens: 150,
 		},
-		user: { username: "newUser" },
 		contentId: "0",
 		ratings2d: [
 			[
@@ -47,8 +48,9 @@ export const dummyFeed = [
 			},
 			createdAt: 1627592144734283000n,
 			id: "1",
+			user: { id: "1", username: "newUser3" },
+			burntTokens: 200,
 		},
-		user: { username: "newUser3" },
 		contentId: "1",
 		ratings2d: [
 			[

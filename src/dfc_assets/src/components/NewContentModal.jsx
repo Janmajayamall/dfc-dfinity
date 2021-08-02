@@ -52,7 +52,7 @@ export const NewContentModal = ({
 							marginBottom: 10,
 						}}
 					>
-						{"Flat new content"}
+						{"Flag new content"}
 					</Typography>
 					<TextField
 						multiline

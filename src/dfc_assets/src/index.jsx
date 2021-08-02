@@ -45,7 +45,7 @@ const Feed = () => {
 				contentId: contentId,
 				createdAt: new Date().getTime(),
 				text: commentText,
-				user: { username: "newUser1" },
+				user: { username: "justBeingHelpful" },
 			},
 			true
 		);
@@ -219,7 +219,6 @@ const Feed = () => {
 					style={{
 						display: "flex",
 						justifyContent: "flex-end",
-						backgroundColor: colorScheme.primary,
 					}}
 				>
 					<IconButton

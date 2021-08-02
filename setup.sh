@@ -14,7 +14,7 @@ dfx canister call dfc createProfile '("justBeingHelpful")'
 dfx identity use default
 dfx canister call dfc flagContent '("1421807363359535108", 200)' # POST ID - 0
 dfx canister call dfc flagContent '("1421804550948757517", 300)' # POST ID - 1
-dfx canister call dfc flagContent '("1421805575722074116", 350)' # POST ID - 2
+dfx canister call dfc flagContent '("1422227460284850181", 350)' # POST ID - 2
 dfx canister call dfc flagContent '("1421805138105102340", 200)' # POST ID - 3
 
 # comments for POST ID 0
@@ -84,7 +84,7 @@ dfx canister call dfc addRating '("4", true)'
 
 # The government is hiding number of deaths caused by covid-19 vaccines, claims a whistleblower. #DUMPMASKS #UNJECTED
 # Comment 1 - It's important to note that FDA requires every vaccine provider to report deaths after vaccine to VAERS. After any report is received doctors from CDC and FDA review each report very carefully. Adverse events related to vaccines are rare, since millions have received vaccination & adverse side-effects are only observed in few hundreds. Moreover, CDC is still invetigating whether these adverse eventsa are directly caused from vaccination. You can read more about it here  - https://www.cdc.gov/coronavirus/2019-ncov/vaccines/safety/adverse-events.html
-# Commment 2 - Over 339 million vaccine doses were given to 187.2 million people in the US as of July 19, 2021. Between December 2020 and July 19th, 2021, VAERS received 6,207 reports of death (0.0018% of doses) among people who got a vaccine, but this does not mean the vaccine caused these deaths. Only 3 cases of blood clost appear to have been linked to vaccines. Hence, vaccines are immensely safe. Source - https://covid-101.org/science/how-many-people-have-died-from-the-vaccine-in-the-u-s/
+# Commment 2 - Over 339 million vaccine doses were given to 187 million people in the US as of July 19, 2021. Between December 2020 and July 19th, 2021, VAERS received 6,207 reports of death (0.0018% of doses) among people who got a vaccine, but this does not mean the vaccine caused these deaths. Only 3 cases of blood clost appear to have been linked to vaccines. Hence, vaccines are immensely safe. Source - https://covid-101.org/science/how-many-people-have-died-from-the-vaccine-in-the-u-s/
 
 # Venice hasn't seen clear canal wanter in a very long time. Dolphin showing up too, nature just hit the reset button
 # Comment 1 - Even though evernyone is loving this. The footage does not show dolphins in Venice. The video was actually taken in the port of Cagliari in Sardinia, around 750 km away from Venice. Check out here - https://www.euronews.com/2020/03/20/debunked-video-does-not-show-dolphins-in-venice-s-canals-thecube for more info.
