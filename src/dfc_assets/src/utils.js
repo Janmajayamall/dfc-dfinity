@@ -62,3 +62,11 @@ export const dummyFeed = [
 		],
 	},
 ];
+
+export const colorScheme = {
+	primary: "#14171A",
+	secondary: "#222222",
+	darkGrey: "#657786",
+	textPrimary: "#ffffff",
+	red: "#FF5A5F",
+};

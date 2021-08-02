@@ -1,7 +1,12 @@
 import * as React from "react";
 import { render } from "react-dom";
 import FeedItem from "./components/FeedItem";
-import { addComment, getFeed } from "./dfx_canister_calls";
+import {
+	addComment,
+	getFeed,
+	lookupUser,
+	flagContent,
+} from "./dfx_canister_calls";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -12,19 +17,20 @@ import PersonIcon from "@material-ui/icons/Person";
 import AddIcon from "@material-ui/icons/Add";
 import Fab from "@material-ui/core/Fab";
 import { NewContentModal } from "./components/NewContentModal";
+import { colorScheme } from "./utils";
 
 const Feed = () => {
 	const [feed, setFeed] = React.useState([]);
-	const [user, setUser] = React.useState({
-		id: 1,
-		username: "this is username",
-	});
+	const [user, setUser] = React.useState({ id: "", username: "" });
 	const [toggleUpdate, setToggleUpdate] = React.useState(true);
 	const [profileModalState, setProfileModalState] = React.useState(false);
 	const [newContentModalState, setNewContentModalState] =
 		React.useState(false);
 
 	React.useEffect(async () => {
+		const user = await lookupUser();
+		setUser(user);
+
 		const feed = await getFeed();
 		setFeed(feed);
 	}, []);
@@ -37,7 +43,7 @@ const Feed = () => {
 			{
 				id: fakeId,
 				contentId: contentId,
-				createdAt: 1627592149940225000n,
+				createdAt: new Date().getTime(),
 				text: commentText,
 				user: { username: "newUser1" },
 			},
@@ -138,6 +144,66 @@ const Feed = () => {
 		setToggleUpdate(!toggleUpdate);
 	}
 
+	async function flagNewContent(contentUrl, tokens) {
+		//post id
+		let postId = contentUrl.split("/").pop();
+
+		// handle optimistic update
+		let fakeContentId = "10000000";
+		handleFlagNewContent(
+			{
+				id: fakeContentId,
+				contentIdentification: {
+					postId: postId,
+				},
+				createdAt: new Date().getTime(),
+				user: user,
+				burntTokens: Number(tokens),
+			},
+			true
+		);
+
+		// canister call
+		try {
+			const newFlaggedContent = await flagContent(postId, Number(tokens));
+			handleFlagNewContent(newFlaggedContent, false);
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	async function handleFlagNewContent(contentObject, optimisticUpdate) {
+		if (optimisticUpdate === true) {
+			let updatedFeed = [
+				{
+					contentId: contentObject.id,
+					content: contentObject,
+					comments: [],
+					ratings2d: [[]],
+				},
+				...feed,
+			];
+			setFeed(updatedFeed);
+		} else {
+			var updatedFeed = feed.filter((content) => {
+				return (
+					content.contentIdentification.postId !==
+					contentObject.contentIdentification.postId
+				);
+			});
+			updatedFeed = [
+				{
+					contentId: contentObject.id,
+					content: contentObject,
+					comments: [],
+					ratings2d: [[]],
+				},
+				...updatedFeed,
+			];
+			setFeed(updatedFeed);
+		}
+	}
+
 	function toggleProfileModal() {
 		setProfileModalState(!profileModalState);
 	}
@@ -147,17 +213,23 @@ const Feed = () => {
 	}
 
 	return (
-		<div style={{ flex: 1 }}>
+		<div style={{ flex: 1, backgroundColor: colorScheme.primary }}>
 			<AppBar position="static">
 				<Toolbar
-					style={{ display: "flex", justifyContent: "flex-end" }}
+					style={{
+						display: "flex",
+						justifyContent: "flex-end",
+						backgroundColor: colorScheme.primary,
+					}}
 				>
 					<IconButton
 						onClick={() => {
 							toggleProfileModal();
 						}}
 					>
-						<PersonIcon />
+						<PersonIcon
+							style={{ color: colorScheme.textPrimary }}
+						/>
 					</IconButton>
 				</Toolbar>
 			</AppBar>
@@ -201,6 +273,7 @@ const Feed = () => {
 				user={user}
 				open={newContentModalState}
 				handleClose={toggleNewContentModal}
+				flagNewContent={flagNewContent}
 			/>
 		</div>
 	);

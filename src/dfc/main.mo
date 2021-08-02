@@ -11,7 +11,6 @@ actor {
     public type Site = {#twitter; #facebook};
 
     public type ContentIdentification = {
-        site: Site;
         postId: Text;
     };
 
@@ -21,6 +20,7 @@ actor {
         contentIdentification:ContentIdentification;
         createdAt: Int;
         user: User;
+        burntTokens: Int;
     };
 
     public type CommentId = Text;
@@ -157,7 +157,7 @@ actor {
         return feedArray
     };
 
-    public shared (msg) func flagContent(site: Site, postId: Text) : async () {
+    public shared (msg) func flagContent(postId: Text, burntTokens: Int) : async Content {
         // check whether content has already been flagged or not 
 
         // change it to Reject to make the error more clear
@@ -168,20 +168,25 @@ actor {
 
         // content identification
         let contentIdentification: ContentIdentification = {
-            site = site;
             postId = postId;
         };
-        
-        // insert flagged content into contents hashmap
-        contentsMap.put(contentId, {
+
+        // new content 
+        let newContent: Content = {
             id = contentId;
             contentIdentification = contentIdentification;
             createdAt = Time.now();
             user = user;
-        });
+            burntTokens = burntTokens;
+        };
+        
+        // insert flagged content into contents hashmap
+        contentsMap.put(contentId, newContent);
 
         // insert content comment map
         contentCommentsMap.put(contentId, HashMap.HashMap<CommentId, Comment>(1, Text.equal, Text.hash));
+
+        return newContent
     };
 
     public shared (msg) func addComment(contentId: ContentId, comment: Text) : async Comment {

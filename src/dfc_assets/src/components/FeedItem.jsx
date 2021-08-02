@@ -12,12 +12,22 @@ import IconButton from "@material-ui/core/IconButton";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { idlFactory as dfc_idl, canisterId as dfc_id } from "dfx-generated/dfc";
 import Comment from "./Comment";
+import { colorScheme } from "../utils";
 
 const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 	const [newComment, setNewComment] = React.useState("");
 
 	return (
-		<Card style={{ margin: 10, padding: 10, width: 520 }}>
+		<Paper
+			style={{
+				margin: 10,
+				padding: 10,
+				width: 520,
+				backgroundColor: colorScheme.secondary,
+			}}
+			elevation={14}
+			variant="outlined"
+		>
 			<TweetEmbed
 				id={feedItem.content.contentIdentification.postId}
 				options={{
@@ -42,6 +52,7 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 					style={{
 						display: "flex",
 						flexDirection: "column",
+						marginTop:10
 					}}
 				>
 					<TextField
@@ -58,11 +69,16 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 							fontSize: 10,
 							marginBottom: 5,
 							backgroundColor: "#ffffff",
+							borderRadius: 10,
 						}}
 					/>
 					<Button
 						variant="contained"
 						color="primary"
+						style={{
+							// backgroundColor: colorScheme.primary,
+							color: colorScheme.textPrimary,
+						}}
 						onClick={() => {
 							if (newComment === "") {
 								return;
@@ -75,7 +91,7 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 					</Button>
 				</div>
 			</div>
-		</Card>
+		</Paper>
 	);
 };
 

@@ -2,6 +2,7 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { idlFactory as dfc_idl, canisterId as dfc_id } from "dfx-generated/dfc";
 import { dummyFeed } from "./utils";
 import { AuthClient } from "@dfinity/auth-client";
+import { useImperativeHandle } from "react";
 
 const agent = new HttpAgent();
 const dfc = Actor.createActor(dfc_idl, { agent, canisterId: dfc_id });
@@ -22,4 +23,25 @@ export function addComment(contentId, comment) {
 
 export function addRating(commentId, ratingValue) {
 	return dfc.addRating(commentId, ratingValue);
+}
+
+export async function lookupUser() {
+	try {
+		let user = await dfc.lookupUser();
+		if (user) {
+			return user;
+		} else {
+			throw Error("No user with user id");
+		}
+	} catch (e) {
+		// return default user for dev
+		return {
+			userId: 4,
+			username: "justBeingHelpful",
+		};
+	}
+}
+
+export async function flagContent(site, postId, burntTokens) {
+	return dfc.flagContent(site, postId, burntTokens);
 }

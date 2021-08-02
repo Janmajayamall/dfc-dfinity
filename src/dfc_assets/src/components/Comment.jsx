@@ -9,6 +9,7 @@ import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Divider from "@material-ui/core/Divider";
+import { colorScheme } from "../utils";
 
 const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 	let upRates = [];
@@ -17,7 +18,6 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 
 	function setRatings() {
 		// check user rating
-		console.log(ratings, user);
 		userRating = ratings.find((rating) => rating.user.id === user.id);
 
 		// up ratings
@@ -70,11 +70,14 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 								style={{
 									color:
 										getUserRating() === true
-											? "red"
-											: "blue",
+											? colorScheme.red
+											: colorScheme.darkGrey,
 								}}
 							/>
-							<Typography variant="body2">
+							<Typography
+								variant="body2"
+								style={{ color: colorScheme.textPrimary }}
+							>
 								{getRatesFor(ratingFor).length}
 							</Typography>
 						</div>
@@ -92,15 +95,18 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 								justContent: "center",
 							}}
 						>
-							<Typography variant="body2">
+							<Typography
+								variant="body2"
+								style={{ color: colorScheme.textPrimary }}
+							>
 								{getRatesFor(ratingFor).length}
 							</Typography>
 							<ArrowDownward
 								style={{
 									color:
 										getUserRating() === false
-											? "red"
-											: "blue",
+											? colorScheme.red
+											: colorScheme.darkGrey,
 								}}
 							/>
 						</div>
@@ -116,6 +122,7 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 			style={{
 				display: "flex",
 				flexDirection: "row",
+				backgroundColor: colorScheme.secondary,
 			}}
 		>
 			<div
@@ -134,10 +141,21 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 					marginTop: 8,
 				}}
 			>
-				<Typography variant="body2" style={{ fontWeight: "bold" }}>
+				<Typography
+					variant="body2"
+					style={{
+						fontWeight: "bold",
+						color: colorScheme.textPrimary,
+					}}
+				>
 					{comment.user.username}
 				</Typography>
-				<Typography variant="body2">{comment.text}</Typography>
+				<Typography
+					variant="body2"
+					style={{ color: colorScheme.textPrimary }}
+				>
+					{comment.text}
+				</Typography>
 			</div>
 		</Paper>
 	);
