@@ -6,104 +6,57 @@ import Time "mo:base/Time";
 import Error "mo:base/Error";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
+import Types "./types"
 
 actor {
-    public type Site = {#twitter; #facebook};
-
-    public type ContentIdentification = {
-        postId: Text;
-    };
-
-    public type ContentId = Text;
-    public type Content = {
-        id: ContentId;
-        contentIdentification:ContentIdentification;
-        createdAt: Int;
-        user: User;
-        burntTokens: Int;
-    };
-
-    public type CommentId = Text;
-    public type Comment = {
-        id: CommentId;
-        contentId: ContentId;
-        text: Text;
-        user: User;
-        createdAt: Int;
-    };
-    public type CommentHashMap =  HashMap.HashMap<CommentId, Comment>;
-
-    public type RatingId = Text;
-    public type Rating = {
-        id: RatingId;
-        commentId: CommentId;
-        user: User;
-        ratingValue: Bool;
-    };
-    public type RatingHashMap = HashMap.HashMap<RatingId, Rating>;
-
-    public type UserId = Principal;
-    public type User = {
-        id: UserId;
-        username: Text;
-    };
-
-
-    public type Feed = {
-        contentId: ContentId;
-        content: Content;
-        comments: [Comment];
-        ratings2d: [[Rating]];
-    };
-
-    let usersMap = HashMap.HashMap<UserId, User>(1, func (x, y) {x==y;}, Principal.hash);
-    let contentsMap = HashMap.HashMap<ContentId, Content>(1, Text.equal, Text.hash);
-    let contentCommentsMap = HashMap.HashMap<ContentId, CommentHashMap>(1, Text.equal, Text.hash);
-    let commentRatingsMap = HashMap.HashMap<CommentId, RatingHashMap>(1, Text.equal, Text.hash);
+    let usersMap = HashMap.HashMap<Types.UserId, Types.User>(1, func (x, y) {x==y;}, Principal.hash);
+    let contentsMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Text.equal, Text.hash);
+    let contentCommentsMap = HashMap.HashMap<Types.ContentId, Types.CommentHashMap>(1, Text.equal, Text.hash);
+    let commentRatingsMap = HashMap.HashMap<Types.CommentId, Types.RatingHashMap>(1, Text.equal, Text.hash);
     
     var contentIdCount : Nat = 0;
     var commentIdCount : Nat = 0;
 
-    func findUser(userId: UserId): ?User {
+    func findUser(userId: Types.UserId): ?Types.User {
         usersMap.get(userId);
     };
 
-    func findContent(contentId: ContentId): ?Content {
+    func findContent(contentId: Types.ContentId): ?Types.Content {
         contentsMap.get(contentId);
     };
 
-    func findComment(contentId: ContentId, commentId: CommentId): ?Comment {
+    func findComment(contentId: Types.ContentId, commentId: Types.CommentId): ?Types.Comment {
         let comments = Option.unwrap(contentCommentsMap.get(contentId));
         comments.get(commentId);
     };
 
-    func findAllContents(): [Content] {
-         var contentArray: [Content] = [];
+    func findAllContents(): [Types.Content] {
+         var contentArray: [Types.Content] = [];
 
         for ((id, content) in contentsMap.entries()) {
-            contentArray := Array.append<Content>(contentArray, [content]);
+            contentArray := Array.append<Types.Content>(contentArray, [content]);
         };
 
         return contentArray;
     };
 
-    func findAllComments(contentId: ContentId): [Comment] {
+    func findAllComments(contentId: Types.ContentId): [Types.Comment] {
         var commentsMap = Option.unwrap(contentCommentsMap.get(contentId));
 
-        var commentArray: [Comment] = [];
+        var commentArray: [Types.Comment] = [];
         for ((id, comment) in commentsMap.entries()) {
-            commentArray := Array.append<Comment>(commentArray, [comment]);
+            commentArray := Array.append<Types.Comment>(commentArray, [comment]);
         };
 
         return commentArray;
     };
 
-    func findAllRatings(commentId: CommentId): [Rating] {
+    func findAllRatings(commentId: Types.CommentId): [Types.Rating] {
         var ratingsMap = Option.unwrap(commentRatingsMap.get(commentId));
 
-        var ratingArray: [Rating] = [];
+        var ratingArray: [Types.Rating] = [];
         for((id, rating) in ratingsMap.entries()) {
-            ratingArray := Array.append<Rating>(ratingArray, [rating]);
+            ratingArray := Array.append<Types.Rating>(ratingArray, [rating]);
         };
 
         return ratingArray
@@ -118,40 +71,40 @@ actor {
         });
     };
 
-    public shared query (msg) func lookupUser() : async ?User {
+    public shared query (msg) func lookupUser() : async ?Types.User {
         findUser(msg.caller);
     };
 
-    public shared query (msg) func getAllContents() : async [Content] {
+    public shared query (msg) func getAllContents() : async [Types.Content] {
         findAllContents();
     };
 
-    public shared query (msg) func getAllComments(contentId: ContentId): async [Comment] {
+    public shared query (msg) func getAllComments(contentId: Types.ContentId): async [Types.Comment] {
         findAllComments(contentId);
     };
 
-    public shared query (msg) func getAllRatings(commentId: CommentId): async [Rating] {
+    public shared query (msg) func getAllRatings(commentId: Types.CommentId): async [Types.Rating] {
         findAllRatings(commentId);
     };
 
-    public shared query (msg) func getFeed(): async [Feed] {
-        var feedArray : [Feed] = [];
+    public shared query (msg) func getFeed(): async [Types.Feed] {
+        var feedArray : [Types.Feed] = [];
 
         let contents = findAllContents();
         for (content in contents.vals()){
             let comments = findAllComments(content.id);
-            var ratings2d: [[Rating]] = [];
+            var ratings2d: [[Types.Rating]] = [];
             for (comment in comments.vals()) {
                 let commentRatings = findAllRatings(comment.id);
-                ratings2d := Array.append<[Rating]>(ratings2d, [commentRatings]);
+                ratings2d := Array.append<[Types.Rating]>(ratings2d, [commentRatings]);
             };
-            let feedItem: Feed = {
+            let feedItem: Types.Feed = {
                 contentId = content.id;
                 content = content;
                 comments = comments;
                 ratings2d = ratings2d;
             };
-            feedArray := Array.append<Feed>(feedArray, [feedItem]);
+            feedArray := Array.append<Types.Feed>(feedArray, [feedItem]);
         };
 
         return feedArray
@@ -167,12 +120,12 @@ actor {
         contentIdCount += 1;
 
         // content identification
-        let contentIdentification: ContentIdentification = {
+        let contentIdentification: Types.ContentIdentification = {
             postId = postId;
         };
 
         // new content 
-        let newContent: Content = {
+        let newContent: Types.Content = {
             id = contentId;
             contentIdentification = contentIdentification;
             createdAt = Time.now();
@@ -184,12 +137,12 @@ actor {
         contentsMap.put(contentId, newContent);
 
         // insert content comment map
-        contentCommentsMap.put(contentId, HashMap.HashMap<CommentId, Comment>(1, Text.equal, Text.hash));
+        contentCommentsMap.put(contentId, HashMap.HashMap<Types.CommentId, Types.Comment>(1, Text.equal, Text.hash));
 
         return newContent
     };
 
-    public shared (msg) func addComment(contentId: ContentId, comment: Text) : async Comment {
+    public shared (msg) func addComment(contentId: Types.ContentId, comment: Text) : async Comment {
         // check user
         let user = Option.unwrap(findUser(msg.caller));
         
@@ -199,7 +152,7 @@ actor {
         // a new comment
         let newCommentId: Text = Nat.toText(commentIdCount);
         commentIdCount += 1;
-        let newComment: Comment = {
+        let newComment: Types.Comment = {
             id = newCommentId;
             contentId = contentId;
             text = comment;
@@ -209,7 +162,7 @@ actor {
         comments.put(newCommentId, newComment);
 
         // insert commment rating map
-        commentRatingsMap.put(newCommentId, HashMap.HashMap<RatingId, Rating>(1, Text.equal, Text.hash));
+        commentRatingsMap.put(newCommentId, HashMap.HashMap<Types.RatingId, Types.Rating>(1, Text.equal, Text.hash));
 
         return newComment;
     };
@@ -234,7 +187,7 @@ actor {
     };
 
 
-    func isEqUserId(x: UserId, y: UserId): Bool {
+    func isEqUserId(x: Types.UserId, y: Types.UserId): Bool {
         x == y;
     };
 

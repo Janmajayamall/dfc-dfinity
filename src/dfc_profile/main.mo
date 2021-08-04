@@ -1,0 +1,3 @@
+actor {
+    public type 
+}
