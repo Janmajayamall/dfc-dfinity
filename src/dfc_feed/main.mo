@@ -13,6 +13,8 @@ actor {
     let contentsMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Text.equal, Text.hash);
     let contentCommentsMap = HashMap.HashMap<Types.ContentId, Types.CommentHashMap>(1, Text.equal, Text.hash);
     let commentRatingsMap = HashMap.HashMap<Types.CommentId, Types.RatingHashMap>(1, Text.equal, Text.hash);
+
+    let usernamesHashMap = HashMap.HashMap<Text, Text>(1, Text.equal, Text.hash);
     
     var contentIdCount : Nat = 0;
     var commentIdCount : Nat = 0;
@@ -63,12 +65,25 @@ actor {
     };
 
     // shared functions
-    public shared (msg) func createProfile(username: Text): async () {
-        // Check whether username already exists or not
-        usersMap.put(msg.caller, {
-            id = msg.caller;
-            username = username;
-        });
+    // returns User profile is successful
+    // returns null if username || caller already exist
+    public shared (msg) func registerUser(username: Text): async ?User {
+        let callerExists = usersMap.get(msg.caller);
+        if (callerExists == null){
+
+            let usernameExists = usernamesHashMap.get(username);
+            if (usernameExists == null){
+                let newUser =  {
+                id = msg.caller;
+                username = username;
+                };
+                usersMap.put(msg.caller, newUser);
+                return newUser
+            };
+
+        };
+
+        return null;
     };
 
     public shared query (msg) func lookupUser() : async ?Types.User {
