@@ -1,5 +1,11 @@
 {
 	"canisters": {
+		"dfc_rs": {
+			"type": "custom",
+			"candid": "src/dfc_rs/profile.did",
+			"wasm": "target/wasm32-unknown-unknown/debug/dfc_rs.wasm",
+			"build": "cargo build --target wasm32-unknown-unknown --package dfc_rs"
+		},
 		"dfc": {
 			"main": "src/dfc/main.mo",
 			"type": "motoko"
