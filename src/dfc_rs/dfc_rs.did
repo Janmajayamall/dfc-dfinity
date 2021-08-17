@@ -1,4 +1,5 @@
 service : {
     "register_user": (text) ->  ();
     "flag_content": (text) => ();
+    "testing": () => () query;
 }

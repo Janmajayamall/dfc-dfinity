@@ -2,21 +2,9 @@
 	"canisters": {
 		"dfc_rs": {
 			"type": "custom",
-			"candid": "src/dfc_rs/profile.did",
-			"wasm": "target/wasm32-unknown-unknown/debug/dfc_rs.wasm",
-			"build": "cargo build --target wasm32-unknown-unknown --package dfc_rs"
-		},
-		"dfc": {
-			"main": "src/dfc/main.mo",
-			"type": "motoko"
-		},
-		"dfc_assets": {
-			"dependencies": ["dfc"],
-			"frontend": {
-				"entrypoint": "src/dfc_assets/src/index.html"
-			},
-			"source": ["src/dfc_assets/assets", "dist/dfc_assets/"],
-			"type": "assets"
+			"candid": "src/dfc_rs/dfc_rs.did",
+			"wasm": "target/wasm32-unknown-unknown/release/dfc_rs.wasm",
+			"build": "cargo build --target wasm32-unknown-unknown --package dfc_rs --release"
 		}
 	},
 	"defaults": {
