@@ -8,7 +8,7 @@ actor DfcUsers {
 
     let users = HashMap.HashMap<Types.UserId, Types.Profile>(1, Principal.equal, Principal.hash);
 
-    var userProfileEventSubscribers: [Types.SubcribeUserProfileEventsData] = [];
+    var userProfileEventSubscribers: [Types.SubscribeUserProfileEventsData] = [];
 
     //TODO set of usernames to avoid duplication
     
@@ -46,8 +46,8 @@ actor DfcUsers {
         };
     }; 
 
-    public shared func subcribeUserProfileEvents(data: Types.SubcribeUserProfileEventsData) {
-        userProfileEventSubscribers := Array.append<Types.SubcribeUserProfileEventsData>(userProfileEventSubscribers, [data])
+    public shared func subscribeUserProfileEvents(data: Types.SubscribeUserProfileEventsData) {
+        userProfileEventSubscribers := Array.append<Types.SubscribeUserProfileEventsData>(userProfileEventSubscribers, [data])
     };
 
     public shared func publishUserProfileEvent(userProfileEvent: Types.SubscriptionUserProfileEvent) {

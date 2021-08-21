@@ -35,13 +35,38 @@ shared ({caller = owner}) actor class UserDetails () {
     }
 
     public shared func init(): async () {
-        DfcData.subscribeCommmentEvents({
+        DfcData.subscribeUserDataEvents({
             userId = owner;
-            callback = callbackForCommentEvent;   
+            callback = callbackForUserDataEvent;   
         });
     };
 
-    public shared func calculateAuthorScore(authorScoresMap: HashMap.HashMap<Types.UserId, Float>): async Float {
+    public shared func getReceivedRatingsMetadata(): async [Types.ReceivedRatingsFromUserMetadata] {
+        var metadataArray: Types.ReceivedRatingsFromUserMetadata = [];
+        for ((userId, commentRatingMap) in receivedRatings.entries()) {
+            var positiveRatings: Float = 0;
+            var negativeRatings: Float = 0;
+            var totalRatings: Float = 0;    
+            for ((commentId, ratingObj) in commentRatingMap.entries()){
+                if (ratingObj.rating == true){
+                    positiveRatings += 1;
+                };
+                else {
+                    negativeRatings += 1;
+                };  
+                totalRatings += 1;
+            };
+            metadataArray := Array.append<Types.ReceivedRatingsFromUserMetadata>(metadataArray, {
+                userId = userId;
+                positiveRatings = positiveRatings;
+                negativeRatings = negativeRatings;
+                totalRatings = totalRatings; 
+            });
+        };
+        return metadataArray;
+    };
+
+    public shared func calculateAuthorScore(authorScoresMap: Types.AuthorScoresMap): async Float {
         var numerator: Float = 2;
         var denominator: Float = 6;
 
@@ -63,7 +88,7 @@ shared ({caller = owner}) actor class UserDetails () {
         return authorScore;
     };
 
-    public shared func callbackForCommentEvent(commentEvent: Types.SubscriptionCommentEvent) {
+    public shared func callbackForUserDataEvent(commentEvent: Types.SubscriptionUserDataEvent) {
         switch(commentEvent){
             case (#didAddComment({commentAuthorUserId; comment})){
                 assert(commentAuthorUserId == owner);
@@ -73,7 +98,7 @@ shared ({caller = owner}) actor class UserDetails () {
                 assert(commentAuthorUserId == owner);
                 userComments.delete(commentId);
             };
-            case (#didRecevieRatingOnThyComment({commentAuthorUserId; raterUserId; rating})){
+            case (#didReceiveRatingOnThyComment({commentAuthorUserId; raterUserId; rating})){
                 assert(commentAuthorUserId == owner);               
                 switch(receivedRatings.get(raterUserId)){
                     case (?raterRatingsMap){
