@@ -11,6 +11,10 @@
 		"DfcUsersData": {
 			"main": "src/DfcUsersData/main.mo",
 			"type": "motoko"
+		},
+		"DfcReputationScorer": {
+			"main": "src/DfcReputationScorer/main.mo",
+			"type": "motoko"
 		}
 	},
 	"defaults": {

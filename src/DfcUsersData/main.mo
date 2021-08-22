@@ -1,6 +1,7 @@
 import HashMap "mo:base/HashMap";
 import DfcUsers "canister:DfcUsers";
 import Principal "mo:base/Principal";
+import Array "mo:base/Array";
 import Types "./../Shared/types";
 import UserDetails "UserDetails";
 
@@ -25,29 +26,39 @@ actor DfcUsersData {
     };
 
     public shared func getUsersDataForAuthorScore(): async Types.UsersDataForAuthorScore {
-        var usersData: [Types.UserId] = [];
+        var usersData: Types.UsersDataForAuthorScore = [];
         for ((userId, userDetails) in usersDataMap.entries()){
-            let receivedRatingsMetadata = await userDetails.getReceivedRatingsMetadata();
-            usersData := Array.append<Types.UserId>(usersData, [{
+            let receivedRatingsMetadataArray = await userDetails.getReceivedRatingsMetadata();
+            usersData := Array.append<{userId: Types.UserId; receivedRatingsMetadataArray: [Types.ReceivedRatingsFromUserMetadata]}>(usersData, [{
                 userId = userId;
-                receivedRatingsMetadata = receivedRatingsMetadata;
+                receivedRatingsMetadataArray = receivedRatingsMetadataArray;
             }]);
         };
         return usersData;
     };
 
-    public shared func gerUsersDataForRaterScore(): 
-
-    public shared func calculateAuthorScoreOfUser(userId: Types.UserId, authorScoresMap: Types.AuthorScoresMap): async Float {
-        switch(usersDataMap.get(userId)){
-            case(?userDetails){
-                let userAuthorScore = await userDetails.calculateAuthorScore(authorScoresMap);
-                return userAuthorScore;
-            };
-            case _ {
-                return 0.0;
-            };
+    public shared func getUsersDataForRaterScore(): async Types.UsersDataForRaterScore {
+        var usersData: [{userId: Types.UserId; userValidRatings: [Types.Rating]}] = [];
+        for ((userId, userDetails) in usersDataMap.entries()){
+            let validRatings = await userDetails.getUserValidRatings();
+            usersData := Array.append<{userId: Types.UserId; userValidRatings: [Types.Rating]}>(usersData, [{
+                userId = userId;
+                userValidRatings = validRatings;
+            }]);
         };
+        return usersData;
     };
+
+    // public shared func calculateAuthorScoreOfUser(userId: Types.UserId, authorScoresMap: Types.AuthorScoresMap): async Float {
+    //     switch(usersDataMap.get(userId)){
+    //         case(?userDetails){
+    //             let userAuthorScore = await userDetails.calculateAuthorScore(authorScoresMap);
+    //             return userAuthorScore;
+    //         };
+    //         case _ {
+    //             return 0.0;
+    //         };
+    //     };
+    // };
     
 }

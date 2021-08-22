@@ -100,13 +100,17 @@ module {
     };
 
     // for subscription of rating events
+    public type RatingUpdate = {
+        commentId: CommentId; rating: Rating; positiveDelta: Int; negativeDelta: Int;
+    };
+
     public type SubscriptionRatingEvent = {
-        #didUpdateRating: {commentId: CommentId; rating: Rating; positiveDelta: Int; negativeDelta: Int};
-    }
+        #didUpdateRating: RatingUpdate;
+    };
 
     public type SubscribeRatingEventsData = {
         callback: shared SubscriptionRatingEvent -> ();
-    }
+    };
 
     // Reputation score
     public type ReputationScore = {
@@ -116,10 +120,12 @@ module {
         timestamp: Timestamp;
     };
 
-    public type LeadershipBoard = HashMap.HashMap<Timestamp, HashMap.HashMap<UserId, ReputationScore>>(1, Int.equal, Int.hash);
-    public type AuthorScoresMap = HashMap.HashMap<Types.UserId, Float>;
+    public type LeadershipBoard = HashMap.HashMap<Timestamp, HashMap.HashMap<UserId, ReputationScore>>;
+    public type AuthorScoresMap = HashMap.HashMap<UserId, Float>;
 
-    public type ReceivedRatingsFromUserMetadata = {userId: Types.User; positiveRatings: Float; negativeRatings: Float; totalRatings: Float};
-    public type UsersDataForAuthorScore = [{userId: UserId, receivedRatingsMetadata: [ReceivedRatingsFromUserMetadata]}];
-    public type UsersAuthorScoreMap = HashMap.HashMap<Types.UserId, {authorScore: Float}>;
+    public type ReceivedRatingsFromUserMetadata = {userId: UserId; positiveRatings: Float; negativeRatings: Float; totalRatings: Float};
+    public type UsersDataForAuthorScore = [{userId: UserId; receivedRatingsMetadataArray: [ReceivedRatingsFromUserMetadata]}];
+    public type UsersAuthorScoreMap = HashMap.HashMap<UserId, {authorScore: Float}>;
+    public type UsersDataForRaterScore = [{userId: UserId; userValidRatings: [Rating]}];
+    public type UsersRaterScoreMap = HashMap.HashMap<UserId, {raterScore: Float}>;
 };

@@ -17,7 +17,7 @@ actor DfcData {
     let commentRatingMap = HashMap.HashMap<Types.CommentId, HashMap.HashMap<Types.UserId, Types.Rating>>(1, Nat.equal, Hash.hash);
 
     let userDataEventSubscribers = HashMap.HashMap<Types.UserId, Types.SubscribeUserDataEventsData>(1, Principal.equal, Principal.hash);
-    var ratingEventSubscribers = [Types.SubscribeRatingEventsData];
+    var ratingEventSubscribers: [Types.SubscribeRatingEventsData] = [];
     
     var contentIdCount: Nat = 0;
     var commentIdCount: Nat = 0;
@@ -184,8 +184,8 @@ actor DfcData {
             case (?commentRatings){
                 var validRating: Bool = false;
                 if(commentRatings.size() <= 5){
-                    validRating = true;
-                }
+                    validRating := true;
+                };
                 let newRating: Types.Rating = {
                     userId = msg.caller;
                     rating = rating;
@@ -204,7 +204,7 @@ actor DfcData {
                                     positiveDelta = 1;
                                     negativeDelta = -1;
                                 }));
-                            };
+                            }
                             else {
                                 publishRatingEvent(#didUpdateRating({
                                     commentId = commentId;
@@ -216,14 +216,14 @@ actor DfcData {
                         };
                     };
                     case _ {
-                        if (newRating == true){
+                        if (newRating.rating == true){
                             publishRatingEvent(#didUpdateRating({
                                 commentId = commentId;
                                 rating = newRating;
                                 positiveDelta = 1;
                                 negativeDelta = 0;
                             }));
-                        };
+                        }
                         else {
                             publishRatingEvent(#didUpdateRating({
                                 commentId = commentId;
