@@ -101,7 +101,7 @@ module {
 
     // for subscription of rating events
     public type RatingUpdate = {
-        commentId: CommentId; rating: Rating; positiveDelta: Int; negativeDelta: Int;
+        commentId: CommentId; contentId: ContentId; ratingObj: Rating; positiveDelta: Int; negativeDelta: Int;
     };
 
     public type SubscriptionRatingEvent = {
@@ -111,6 +111,24 @@ module {
     public type SubscribeRatingEventsData = {
         callback: shared SubscriptionRatingEvent -> ();
     };
+
+    // for subscription of content events
+    public type SubscriptionContentEvent = {
+        #didFlagNewContent: {contentId: ContentId; content: Content};
+    }
+
+    public type SubscribeContentEventsData = {
+        callback: shared SubscriptionContentEvent -> ();
+    }
+
+    // for subscription of comment events
+    public type SubscriptionCommentEvent = {
+        #didAddComment: {commentId: CommentId; contentId: ContentId; comment: Comment};
+    };
+
+    public type SubscribeCommentEventsData = {
+        callback: shared SubscriptionCommentEvent -> ();
+    }
 
     // Reputation score
     public type ReputationScore = {

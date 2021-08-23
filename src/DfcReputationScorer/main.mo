@@ -15,6 +15,7 @@ actor DfcReputationScorer {
 
     let leadershipBoardMap = HashMap.HashMap<Types.Timestamp, HashMap.HashMap<Types.UserId, Types.ReputationScore>>(1, Int.equal, Int.hash);
     let commentsRatingDataMap = HashMap.HashMap<Types.CommentId, {commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}>(1, Nat.equal, Hash.hash);
+    var latestTimestamp: Types.Timestamp = Time.now();
 
     public shared func init(): async () {
         DfcData.subscribeRatingEvents({
@@ -134,6 +135,7 @@ actor DfcReputationScorer {
                 };
             };
         };
+        latestTimestamp = startTimestamp;
         leadershipBoardMap.put(startTimestamp, reputationScoreMap);
     };
  

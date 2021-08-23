@@ -18,6 +18,8 @@ actor DfcData {
 
     let userDataEventSubscribers = HashMap.HashMap<Types.UserId, Types.SubscribeUserDataEventsData>(1, Principal.equal, Principal.hash);
     var ratingEventSubscribers: [Types.SubscribeRatingEventsData] = [];
+    var contentEventSubscribers: [Types.SubscribeContentEventsData] = [];
+    var commentEventSubscribers: [Types.SubscribeCommentEventsData] = [];
     
     var contentIdCount: Nat = 0;
     var commentIdCount: Nat = 0;
@@ -143,6 +145,9 @@ actor DfcData {
         contentMap.put(contentId, newContent);
         contentCommentMap.put(contentId, HashMap.HashMap<Types.CommentId, Types.Comment>(1, Nat.equal, Hash.hash));
 
+        // publish content event
+        publishContentEvent(#didFlagNewContent({contentId = newContent.id; content = newContent}));
+
         return newContent;
     };
 
@@ -162,8 +167,10 @@ actor DfcData {
                 contentComments.put(commentId, newComment);
                 commentRatingMap.put(commentId, HashMap.HashMap<Types.UserId, Types.Rating>(1, Principal.equal, Principal.hash));
 
-                // publish didAddComment event
+                // publish didAddComment event for user data event
                 publishUserDataEvent([msg.caller], #didAddComment({commentAuthorUserId = msg.caller; comment = newComment}));
+                // publish didAddComment event for comment event
+                publishCommentEvent(#didAddComment({commentId = newComment.id; contentId = newComment.contentId; comment = newComment}));
                 
                 return #ok(newComment);
             };
@@ -180,8 +187,8 @@ actor DfcData {
     };
 
     public shared (msg) func rateComment(contentId: Types.ContentId, commentId: Types.CommentId, rating: Bool): async Result.Result<Types.Rating, Types.CommentId> {
-        switch (commentRatingMap.get(commentId)) {
-            case (?commentRatings){
+        switch (commentRatingMap.get(commentId), _getCommentOfContentId(contentId, commentId)) {
+            case (?commentRatings, #ok(commentObj)){
                 var validRating: Bool = false;
                 if(commentRatings.size() <= 5){
                     validRating := true;
@@ -200,7 +207,8 @@ actor DfcData {
                             if(newRating.rating == true){
                                 publishRatingEvent(#didUpdateRating({
                                     commentId = commentId;
-                                    rating = newRating;
+                                    contentId = contentId;
+                                    ratingObj = newRating;
                                     positiveDelta = 1;
                                     negativeDelta = -1;
                                 }));
@@ -208,7 +216,8 @@ actor DfcData {
                             else {
                                 publishRatingEvent(#didUpdateRating({
                                     commentId = commentId;
-                                    rating = newRating;
+                                    contentId = contentId;
+                                    ratingObj = newRating;
                                     positiveDelta = -1;
                                     negativeDelta = 1;
                                 }));
@@ -219,7 +228,8 @@ actor DfcData {
                         if (newRating.rating == true){
                             publishRatingEvent(#didUpdateRating({
                                 commentId = commentId;
-                                rating = newRating;
+                                contentId = contentId;
+                                ratingObj = newRating;
                                 positiveDelta = 1;
                                 negativeDelta = 0;
                             }));
@@ -227,7 +237,8 @@ actor DfcData {
                         else {
                             publishRatingEvent(#didUpdateRating({
                                 commentId = commentId;
-                                rating = newRating;
+                                contentId = contentId;
+                                ratingObj = newRating;
                                 positiveDelta = 0;
                                 negativeDelta = 1;
                             }));
@@ -238,20 +249,13 @@ actor DfcData {
                 // update rating
                 commentRatings.put(msg.caller, newRating);
 
-                // publish didReceiveRatingOnThyComment & didAddNewRating event
-                switch(_getCommentOfContentId(contentId: Types.ContentId, commentId: Types.CommentId)){
-                    case (#ok(comment)){
-                        publishUserDataEvent([comment.userId], #didReceiveRatingOnThyComment({commentAuthorUserId = comment.userId; raterUserId = msg.caller; rating = newRating}));
-                    };
-                    case _ {
-
-                    };
-                };
+                // publish didReceiveRatingOnThyComment & didAddNewRating for user data event
+                publishUserDataEvent([comment.userId], #didReceiveRatingOnThyComment({commentAuthorUserId = commentObj.userId; raterUserId = msg.caller; rating = newRating}));
                 publishUserDataEvent([msg.caller], #didAddNewRating({raterUserId = msg.caller; rating = newRating}));
 
                 return #ok(newRating);
             };
-            case null {
+            case _ {
                 return #err(commentId);
             };
         };
@@ -263,6 +267,14 @@ actor DfcData {
 
     public shared func subscribeRatingEvents(data: Types.SubscribeRatingEventsData) {
         ratingEventSubscribers := Array.append<Types.SubscribeRatingEventsData>(ratingEventSubscribers, [data]);
+    };
+
+    public shared func subscribeContentEvents(data: Types.SubscribeContentEventsData) {
+        contentEventSubscribers := Array.append<Types.SubscribeContentEventsData>(contentEventSubscribers, [data]);
+    };
+
+    public shared func subscribeCommentEvents(data: Types.SubscribeCommentEventsData) {
+        commentEventSubscribers := Array.append<Types.SubscribeCommentEventsData>(commentEventSubscribers, [data]);
     };
 
     public shared func publishUserDataEvent(userIds: [Types.UserId], commentEvent: Types.SubscriptionUserDataEvent) {
@@ -281,6 +293,18 @@ actor DfcData {
     public shared func publishRatingEvent(ratingEvent: Types.SubscriptionRatingEvent){
         for (s in ratingEventSubscribers.vals()){
             s.callback(ratingEvent);
+        };
+    };
+
+    public shared func publishContentEvent(contentEvent: Types.SubscriptionContentEvent){
+        for (s in contentEventSubscribers.vals()){
+            s.callback(contentEvent);
+        };
+    };
+
+    public shared func publishCommentEvent(commentEvent: Types.SubscriptionCommentEvent){
+        for (s in commentEventSubscribers.vals()){
+            s.callback(commentEvent);
         };
     };
 }
