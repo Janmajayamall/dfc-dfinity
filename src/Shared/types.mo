@@ -115,11 +115,11 @@ module {
     // for subscription of content events
     public type SubscriptionContentEvent = {
         #didFlagNewContent: {contentId: ContentId; content: Content};
-    }
+    };
 
     public type SubscribeContentEventsData = {
         callback: shared SubscriptionContentEvent -> ();
-    }
+    };
 
     // for subscription of comment events
     public type SubscriptionCommentEvent = {
@@ -128,7 +128,7 @@ module {
 
     public type SubscribeCommentEventsData = {
         callback: shared SubscriptionCommentEvent -> ();
-    }
+    };
 
     // Reputation score
     public type ReputationScore = {

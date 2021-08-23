@@ -135,7 +135,7 @@ actor DfcReputationScorer {
                 };
             };
         };
-        latestTimestamp = startTimestamp;
+        latestTimestamp := startTimestamp;
         leadershipBoardMap.put(startTimestamp, reputationScoreMap);
     };
  

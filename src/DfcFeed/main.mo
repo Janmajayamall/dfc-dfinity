@@ -1,17 +1,17 @@
 import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
 import Principal "mo:base/Principal";
+import Nat "mo:base/Nat";
 import Types "./../Shared/types";
 import DfcData "canister:DfcData";
-import 
 
 actor {
-    let flaggedContentMap = HashMap.HashMap<Types.ContentId, HashMap.HashMap<Types.CommentId, [{
+    let flaggedContentMap = HashMap.HashMap<Types.ContentId, HashMap.HashMap<Types.CommentId, {
         positiveRatings: HashMap.HashMap<Types.UserId, Bool>;
         negativeRatings: HashMap.HashMap<Types.UserId, Bool>;
-    }]>>(1, Nat.equal, Hash.hash);
-    let needsHelpFeedMap = HashMap.HashMap<Types.ContentId, Types.Content>();
-    let satisfiedFeedMap = HashMap.HashMap<Types.ContentId, Types.Content>();
+    }>>(1, Nat.equal, Hash.hash);
+    let needsHelpFeedMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Nat.equal, Hash.hash);
+    let satisfiedFeedMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Nat.equal, Hash.hash);
 
     public func init() {
         DfcData.subscribeRatingEvents({callback = callbackForRatingEvent});
@@ -30,10 +30,10 @@ actor {
                     case(?commentMap){
                         switch(commentMap.get(newComment.commentId)){
                             case null {
-                                commentMap.put([{
+                                commentMap.put(newComment.commentId, {
                                     positiveRatings = HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash);
                                     negativeRatings = HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash);
-                                }]);
+                                });
                             };
                             case _ {};
                         };
@@ -54,7 +54,7 @@ actor {
                                 if (ratingUpdate.ratingObj.rating == true){
                                     ratingMap.positiveRatings.put(ratingUpdate.ratingObj.userId, true);
                                     ratingMap.negativeRatings.delete(ratingUpdate.ratingObj.userId);
-                                };
+                                }
                                 else {
                                     ratingMap.negativeRatings.put(ratingUpdate.ratingObj.userId, true);
                                     ratingMap.positiveRatings.delete(ratingUpdate.ratingObj.userId);
@@ -66,7 +66,6 @@ actor {
                     case _ {};
                 };
             };
-            case _ {};
         };
     };
 
@@ -76,14 +75,13 @@ actor {
                 switch(flaggedContentMap.get(newContent.contentId)){
                     case null {
                         flaggedContentMap.put(
-                            HashMap.HashMap<Types.CommentId, [{
+                           newContent.contentId,
+                            HashMap.HashMap<Types.CommentId, {
                                 positiveRatings: HashMap.HashMap<Types.UserId, Bool>;
                                 negativeRatings: HashMap.HashMap<Types.UserId, Bool>;
-                            }]>(1, Nat.equal, Hash.hash);
+                            }>(1, Nat.equal, Hash.hash)
                         );
-
-                        // add to needs help feed
-
+                        // TODO add to needs help feed
 
                     };
                     case _ {
@@ -95,10 +93,10 @@ actor {
     };
 }
 
-1. Keep cache of content being flagged
-2. Keep cache of comments & respective ratings they have received {to figure out whether any of them is effective}
-3. Keep two maps, one for needs more help feed & one for satisfied feed.
-4. Add every new content to needs more help feed initially
-5. At regular intervals scan the two maps and do the following - 
-    a. Check whether content in needs more help feed can be promoted to satisfied feed
-    b. Check whether content in satisfied feed needs to be demoted
+// 1. Keep cache of content being flagged
+// 2. Keep cache of comments & respective ratings they have received {to figure out whether any of them is effective}
+// 3. Keep two maps, one for needs more help feed & one for satisfied feed.
+// 4. Add every new content to needs more help feed initially
+// 5. At regular intervals scan the two maps and do the following - 
+//     a. Check whether content in needs more help feed can be promoted to satisfied feed
+//     b. Check whether content in satisfied feed needs to be demoted

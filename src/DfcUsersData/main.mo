@@ -60,5 +60,66 @@ actor DfcUsersData {
     //         };
     //     };
     // };
-    
+
+    // test functions for CandidUI
+    public shared func testGetAllUsersComments(): async [{userId: Types.UserId; comments: [Types.Comment]}] {
+        var returnArray: [{userId: Types.UserId; comments: [Types.Comment]}] = [];
+        for ((userId, userDetails) in usersDataMap.entries()){
+            let commentsR = await userDetails.testGetUserComments();
+            returnArray := Array.append<{userId: Types.UserId; comments: [Types.Comment]}>(
+                returnArray,
+                [{
+                    userId = userId;
+                    comments = commentsR;
+                }]
+            );
+        };
+        return returnArray;
+    }; 
+      
+    public shared func testAllUsersReceivedRatings(): async [{userId: Types.UserId; receivedRatings: [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}]}] {
+        var returnArray: [{userId: Types.UserId; receivedRatings: [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}]}] = [];
+        for ((userId, userDetails) in usersDataMap.entries()){
+            let receivedRatingsR = await userDetails.testReceivedRatings();
+            returnArray := Array.append<
+                {userId: Types.UserId; receivedRatings: [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}]}
+            >(
+                returnArray,
+                [{
+                    userId = userId;
+                    receivedRatings = receivedRatingsR;
+                }]
+            );
+        };
+        return returnArray;
+    };
+
+    public shared func testAllUserRatings(): async [{userId: Types.UserId; ratings: [{commentId: Types.CommentId; rating: Types.Rating}]}] {
+        var returnArray: [{userId: Types.UserId; ratings: [{commentId: Types.CommentId; rating: Types.Rating}]}] = [];
+        for ((userId, userDetails) in usersDataMap.entries()){
+            let ratingsR = await userDetails.testUserRatings();
+            returnArray := Array.append<
+                {userId: Types.UserId; ratings: [{commentId: Types.CommentId; rating: Types.Rating}]}
+            >(
+                returnArray,
+                [{
+                    userId = userId;
+                    ratings = ratingsR;
+                }]
+            );
+        };
+        return returnArray;
+    };
+
+    public shared func getAllUsers(): async [Types.UserId] {
+        var returnArray: [Types.UserId] = [];
+        for ((userId, userDetails) in usersDataMap.entries()){
+            returnArray := Array.append<Types.UserId>(returnArray, [userId]);            
+        };
+        return returnArray;
+    };
+
+    public shared (msg) func getMyPrincipal(): async Principal {
+        return msg.caller;
+    };
 }

@@ -13,8 +13,8 @@ actor DfcUsers {
     //TODO set of usernames to avoid duplication
     
 
-    public shared query (msg) func getUserProfile(): async Result.Result<Types.Profile, Types.ProfileError> {
-        switch (users.get(msg.caller)){
+    public shared query (msg) func getUserProfile(userId: Types.UserId): async Result.Result<Types.Profile, Types.ProfileError> {
+        switch (users.get(userId)){
             case (?profile){
                 return #ok(profile);
             };
@@ -56,4 +56,16 @@ actor DfcUsers {
         };
     };
 
+    // test functions for CandidUI
+    public shared func getAllUsers(): async [Types.Profile] {
+        var profiles: [Types.Profile] = [];
+        for ((userId, profile) in users.entries()){
+            profiles := Array.append<Types.Profile>(profiles, [profile]);            
+        };
+        return profiles;
+    };
+
+    public shared (msg) func getMyPrincipal(): async Principal {
+        return msg.caller;
+    };
 }

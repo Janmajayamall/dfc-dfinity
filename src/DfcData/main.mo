@@ -152,7 +152,7 @@ actor DfcData {
     };
 
     public shared (msg) func addComment(commentText: Text, contentId: Types.ContentId): async Result.Result<Types.Comment, Types.NewCommentError> {
-        switch (contentCommentMap.get(contentId), await DfcUsers.getUserProfile()){
+        switch (contentCommentMap.get(contentId), await DfcUsers.getUserProfile(msg.caller)){
             case (?contentComments, #ok(userProfile)){
                 let commentId = commentIdCount;
                 commentIdCount += 1;
@@ -250,7 +250,7 @@ actor DfcData {
                 commentRatings.put(msg.caller, newRating);
 
                 // publish didReceiveRatingOnThyComment & didAddNewRating for user data event
-                publishUserDataEvent([comment.userId], #didReceiveRatingOnThyComment({commentAuthorUserId = commentObj.userId; raterUserId = msg.caller; rating = newRating}));
+                publishUserDataEvent([commentObj.userId], #didReceiveRatingOnThyComment({commentAuthorUserId = commentObj.userId; raterUserId = msg.caller; rating = newRating}));
                 publishUserDataEvent([msg.caller], #didAddNewRating({raterUserId = msg.caller; rating = newRating}));
 
                 return #ok(newRating);
@@ -306,5 +306,10 @@ actor DfcData {
         for (s in commentEventSubscribers.vals()){
             s.callback(commentEvent);
         };
+    };
+
+    // test functions for CandidUI
+    public shared (msg) func getMyPrincipal(): async Principal {
+        return msg.caller;
     };
 }

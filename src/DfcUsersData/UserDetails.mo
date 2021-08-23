@@ -128,4 +128,54 @@ shared ({caller = owner}) actor class UserDetails () {
             };
         };
     };
+
+    // test functions for CandidUI
+    public shared query func testGetUserComments(): async [Types.Comment] {
+        var commentArray: [Types.Comment] = [];
+        for ((commentId, comment) in userComments.entries()){
+            commentArray := Array.append<Types.Comment>(commentArray, [comment]);
+        };
+        return commentArray;
+    };
+
+    public shared query func testReceivedRatings(): async [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}] {
+        var receivedRatingsArray: [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}] = [];
+        for ((userId, commentMap) in receivedRatings.entries()){
+            var comments: [{commentId: Types.CommentId; rating: Types.Rating}] = [];
+            for ((commentId, ratingObj) in commentMap.entries()){
+                comments := Array.append<
+                    {commentId: Types.CommentId; rating: Types.Rating}
+                >(comments, [{
+                    commentId = commentId;
+                    rating = ratingObj;
+                }]);
+            };
+            receivedRatingsArray := Array.append<
+                {userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}
+            >(
+                receivedRatingsArray,
+                [{
+                    userId = userId;
+                    comments = comments;
+                }]
+            );
+        };
+        return receivedRatingsArray;
+    };
+
+    public shared query func testUserRatings(): async [{commentId: Types.CommentId; rating: Types.Rating}] {
+        var userRatingsArray: [{commentId: Types.CommentId; rating: Types.Rating}] = [];
+        for ((commentId, rating) in userRatings.entries()){
+            userRatingsArray := Array.append<
+                {commentId: Types.CommentId; rating: Types.Rating}
+            >(
+                userRatingsArray,
+                [{
+                    commentId = commentId;
+                    rating = rating;
+                }]
+            );
+        };
+        return userRatingsArray;
+    };
 }

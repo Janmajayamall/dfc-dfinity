@@ -15,6 +15,10 @@
 		"DfcReputationScorer": {
 			"main": "src/DfcReputationScorer/main.mo",
 			"type": "motoko"
+		},
+		"DfcFeed": {
+			"main": "src/DfcFeed/main.mo",
+			"type": "motoko"
 		}
 	},
 	"defaults": {
