@@ -18,7 +18,7 @@ actor DfcUsersData {
     public shared func callbackForUserProfileEvent(userProfileEvent: Types.SubscriptionUserProfileEvent) {
         switch(userProfileEvent){
             case (#didRegisterNewUser({userId; profile})){
-                let userDetails = await UserDetails.UserDetails();
+                let userDetails = await UserDetails.UserDetails(userId);
                 await userDetails.init();
                 usersDataMap.put(userId, userDetails);
             };
@@ -61,7 +61,7 @@ actor DfcUsersData {
     //     };
     // };
 
-    // test functions for CandidUI
+    // test functions for __Candid_UI
     public shared func testGetAllUsersComments(): async [{userId: Types.UserId; comments: [Types.Comment]}] {
         var returnArray: [{userId: Types.UserId; comments: [Types.Comment]}] = [];
         for ((userId, userDetails) in usersDataMap.entries()){
@@ -94,7 +94,7 @@ actor DfcUsersData {
         return returnArray;
     };
 
-    public shared func testAllUserRatings(): async [{userId: Types.UserId; ratings: [{commentId: Types.CommentId; rating: Types.Rating}]}] {
+    public shared func testAllUsersRatings(): async [{userId: Types.UserId; ratings: [{commentId: Types.CommentId; rating: Types.Rating}]}] {
         var returnArray: [{userId: Types.UserId; ratings: [{commentId: Types.CommentId; rating: Types.Rating}]}] = [];
         for ((userId, userDetails) in usersDataMap.entries()){
             let ratingsR = await userDetails.testUserRatings();
@@ -111,7 +111,7 @@ actor DfcUsersData {
         return returnArray;
     };
 
-    public shared func getAllUsers(): async [Types.UserId] {
+    public shared func testAllUsers(): async [Types.UserId] {
         var returnArray: [Types.UserId] = [];
         for ((userId, userDetails) in usersDataMap.entries()){
             returnArray := Array.append<Types.UserId>(returnArray, [userId]);            

@@ -13,13 +13,13 @@ actor DfcUsers {
     //TODO set of usernames to avoid duplication
     
 
-    public shared query (msg) func getUserProfile(userId: Types.UserId): async Result.Result<Types.Profile, Types.ProfileError> {
+    public shared query func getUserProfile(userId: Types.UserId): async Result.Result<Types.Profile, Types.ProfileError> {
         switch (users.get(userId)){
             case (?profile){
                 return #ok(profile);
             };
             case _ {
-                return #err(#profileDoesNotExists(msg.caller));
+                return #err(#profileDoesNotExists(userId));
             };
         };
     };

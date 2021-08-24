@@ -7,6 +7,7 @@ import Iter "mo:base/Iter";
 import Bool "mo:base/Bool";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
+import Array "mo:base/Array";
 import DfcData "canister:DfcData";
 import DfcUsersData "canister:DfcUsersData";
 import Types "./../Shared/types";
@@ -90,8 +91,9 @@ actor DfcReputationScorer {
             for (userRating in userData.userValidRatings.vals()){
                 switch(commentsRatingDataMap.get(userRating.commentId)){
                     case(?commentRatingData){
-                        if (((commentRatingData.positiveRatings > commentRatingData.negativeRatings) and (userRating.rating == true))
-                        or ((commentRatingData.positiveRatings < commentRatingData.negativeRatings) and (userRating.rating == false))) {
+                        if ((((commentRatingData.positiveRatings > commentRatingData.negativeRatings) and (userRating.rating == true))
+                        or ((commentRatingData.positiveRatings < commentRatingData.negativeRatings) and (userRating.rating == false)))
+                        and (commentRatingData.positiveRatings + commentRatingData.negativeRatings) >= 5) {
                             ratingsInConsensus += 1;
                         };
                     };
@@ -156,4 +158,17 @@ actor DfcReputationScorer {
             };
         };
     };
+
+    // test functions for __Candid_UI
+    public shared query func testCommentsRatingDataMap(): async [{commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}] {
+        var returnArray: [{commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}] = [];
+        for ((commentId, value) in commentsRatingDataMap.entries()){
+            returnArray := Array.append<{commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}>(
+                returnArray,
+                [value]
+            );
+        };
+        return returnArray;
+    };
+    
 }
