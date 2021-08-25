@@ -8,13 +8,14 @@ import Types "./../Shared/types";
 import DfcData "canister:DfcData";
 
 actor {
-    let flaggedContentMap = HashMap.HashMap<Types.ContentId, [Types.CommentId]>(1, Nat.equal, Hash.hash);
-    let flaggedContentMap = HashMap.HashMap<Types.ContentId, HashMap.HashMap<Types.CommentId, {
-        positiveRatings: HashMap.HashMap<Types.UserId, Bool>;
-        negativeRatings: HashMap.HashMap<Types.UserId, Bool>;
-    }>>(1, Nat.equal, Hash.hash);
-    let commentPositiveRatingsMap = HashMap.HashMap<Types.CommentId, [Types.UserId]>(1, Nat.equal, Hash.hash);
-    let commentNegativeRatingsMap = HashMap.HashMap<Types.CommentId, [Types.UserId]>(1, Nat.equal, Hash.hash);
+    let flaggedContentMap = HashMap.HashMap<Types.ContentId, HashMap.HashMap<Types.CommentId, Bool>>(1, Nat.equal, Hash.hash);
+    // let flaggedContentMap = HashMap.HashMap<Types.ContentId, HashMap.HashMap<Types.CommentId, {
+    //     positiveRatings: HashMap.HashMap<Types.UserId, Bool>;
+    //     negativeRatings: HashMap.HashMap<Types.UserId, Bool>;
+    // }>>(1, Nat.equal, Hash.hash);
+    let commentRatingsMap = HashMap.HashMap<Types.CommentId, HashMap.HashMap<Types.UserId, Bool>>(1, Nat.equal, Hash.hash);
+    let commentPositiveRatingsMap = HashMap.HashMap<Types.CommentId, HashMap.HashMap<Types.UserId, Bool>>(1, Nat.equal, Hash.hash);
+    let commentNegativeRatingsMap = HashMap.HashMap<Types.CommentId, HashMap.HashMap<Types.UserId, Bool>>(1, Nat.equal, Hash.hash);
     
     let needsHelpFeedMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Nat.equal, Hash.hash);
     let satisfiedFeedMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Nat.equal, Hash.hash);
@@ -36,16 +37,22 @@ actor {
                 Debug.print(Nat.toText(newComment.commentId));
                 Debug.print(Nat.toText(newComment.contentId));
                 switch(flaggedContentMap.get(newComment.contentId)){
-                    case(?commentIdArray){
-                        var newArray: [Types.CommentId] = commentIdArray;
-                        
-                        
+                    case(?commentMap){
                         switch(commentMap.get(newComment.commentId)){
                             case null {
-                                commentMap.put(newComment.commentId, {
-                                    positiveRatings = HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash);
-                                    negativeRatings = HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash);
-                                });
+                                commentMap.put(newComment.commentId, true);
+                                commentRatingsMap.put(
+                                    newComment.commentId,
+                                    HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash)
+                                );
+                                commentPositiveRatingsMap.put(
+                                    newComment.commentId,
+                                    HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash)
+                                );
+                                commentNegativeRatingsMap.put(
+                                    newComment.commentId,
+                                    HashMap.HashMap<Types.UserId, Bool>(1, Principal.equal, Principal.hash)
+                                );
                             };
                             case _ {};
                         };
@@ -59,36 +66,45 @@ actor {
     public func callbackForRatingEvent(ratingEvent: Types.SubscriptionRatingEvent){
         switch(ratingEvent){
             case(#didUpdateRating(ratingUpdate)){
-                Debug.print("Dfc feed rating event");
                 Debug.print(Nat.toText(ratingUpdate.commentId));
                 Debug.print(Nat.toText(ratingUpdate.contentId));
-                switch(flaggedContentMap.get(ratingUpdate.contentId)){
-                    case (?commentMap){
-                        switch(commentMap.get(ratingUpdate.commentId)){
-                            case(?ratingMap){
-                                Debug.print("reached here");
-                                var positiveRatings = ratingMap.positiveRatings;
-                                var negativeRatings = ratingMap.negativeRatings;
-                                if (ratingUpdate.ratingObj.rating == true){
-                                    Debug.print("reached here true");
-                                    positiveRatings.put(ratingUpdate.ratingObj.userId, true);
-                                    negativeRatings.delete(ratingUpdate.ratingObj.userId);                                
-                                }
-                                else {
-                                    Debug.print("reached here false");
-                                    negativeRatings.put(ratingUpdate.ratingObj.userId, true);
-                                    positiveRatings.delete(ratingUpdate.ratingObj.userId);                                    
-                                };
-                                commentMap.put(ratingUpdate.commentId, {
-                                    positiveRatings = positiveRatings;
-                                    negativeRatings = negativeRatings;
-                                });
-                            };
-                            case _ {};
+                switch(commentRatingsMap.get(ratingUpdate.commentId)){
+                    case(?ratingMap){
+                        if(ratingUpdate.ratingObj.rating == true){
+                            ratingMap.put(ratingUpdate.ratingObj.userId, true);
+                        }else {
+                            ratingMap.put(ratingUpdate.ratingObj.userId, false);
                         };
                     };
                     case _ {};
                 };
+
+                // switch(commentPositiveRatingsMap.get(ratingUpdate.commentId), commentNegativeRatingsMap.get(ratingUpdate.commentId)){
+                //     case (?positiveRatingMap, ?negativeRatingMap){
+                //         Debug.print("here1");
+                //         // switch(positiveRatingMap.put(ratingUpdate.ratingObj.userId, true)){
+                //         //     case (?exists){
+                //         //         positiveRatingMap
+                //         //     };
+                //         // };
+                //         if (ratingUpdate.ratingObj.rating == true){
+                //             Debug.print("here2");
+                //             // do {
+                //             //     negativeRatingMap.put(ratingUpdate.ratingObj.userId, true);
+                //             // };
+                //             positiveRatingMap.put(ratingUpdate.ratingObj.userId, true);
+                //             negativeRatingMap.delete(ratingUpdate.ratingObj.userId);
+                //             // Debug.print(Principal.toText(ratingUpdate.ratingObj.userId));
+                            
+                //             Debug.print(Nat.toText(positiveRatingMap.size()));
+                //             Debug.print(Nat.toText(negativeRatingMap.size()));
+                //         }else {
+                //             negativeRatingMap.put(ratingUpdate.ratingObj.userId, true);
+                //             // positiveRatingMap.delete(ratingUpdate.ratingObj.userId);
+                //         };                        
+                //     };
+                //     case _ {};
+                // };
             };
         };
     };
@@ -102,7 +118,7 @@ actor {
                     case null {
                         flaggedContentMap.put(
                             newContent.contentId,
-                            []
+                            HashMap.HashMap<Types.CommentId, Bool>(1, Nat.equal, Hash.hash)
                         );
                         // TODO add to needs help feed
                     };
@@ -114,25 +130,74 @@ actor {
         };
     };
 
+    public shared query func getPositiveRating(): async [{commentId: Types.CommentId; ratings:[Types.UserId]}] {
+        var comments: [{commentId: Types.CommentId; ratings:[Types.UserId]}] = [];
+        for ((commentId, ratingMap) in commentPositiveRatingsMap.entries()){
+            var ratings: [Types.UserId] = [];
+            for ((userId, _) in ratingMap.entries()){
+                ratings := Array.append<Types.UserId>(
+                    ratings,
+                    [userId]
+                );  
+            };
+            comments := Array.append<{commentId: Types.CommentId; ratings:[Types.UserId]}>(
+                comments,
+                [{
+                    commentId = commentId;
+                    ratings = ratings;
+                }]
+            );
+        };
+        return comments;
+    };
+
     public shared query func testFlaggedContentMap(): async [{contentId: Types.ContentId; comments:[{commentId: Types.CommentId; ratings:{positiveRatings:[Types.UserId];negativeRatings:[Types.UserId]}}]}] {
+        Debug.print("Start -------");
         var returnArray: [{contentId: Types.ContentId; comments:[{commentId: Types.CommentId; ratings:{positiveRatings:[Types.UserId];negativeRatings:[Types.UserId]}}]}] = [];
         for ((contentId, commentMap) in flaggedContentMap.entries()){
             var commentsArray: [{commentId: Types.CommentId; ratings:{positiveRatings:[Types.UserId];negativeRatings:[Types.UserId]}}] = [];
-            for ((commentId, ratingsObj) in commentMap.entries()){
+            for ((commentId, _) in commentMap.entries()){
                 var positiveRatingsArray: [Types.UserId] = [];
                 var negativeRatingsArray: [Types.UserId] = [];
-                Debug.print("Start -----");
-                Debug.print(Nat.toText(ratingsObj.positiveRatings.size()));
-                Debug.print(Nat.toText(ratingsObj.negativeRatings.size()));
-                for ((userId, _) in ratingsObj.positiveRatings.entries()){
-                    Debug.print(Principal.toText(userId));
-                    positiveRatingsArray := Array.append<Types.UserId>(positiveRatingsArray, [userId]);
+                switch(commentRatingsMap.get(commentId)){
+                    case(?ratingMap){
+                        for((userId, ratingVal) in ratingMap.entries()){
+                            if(ratingVal == true){
+                                positiveRatingsArray := Array.append<Types.UserId>(
+                                    positiveRatingsArray,
+                                    [userId]
+                                );
+                            }else{
+                                negativeRatingsArray := Array.append<Types.UserId>(
+                                    negativeRatingsArray,
+                                    [userId]
+                                );
+                            };
+                        };
+                    };
+                    case _ {};
                 };
-                for ((userId, _) in ratingsObj.negativeRatings.entries()){
-                    Debug.print(Principal.toText(userId));
-                    negativeRatingsArray := Array.append<Types.UserId>(negativeRatingsArray, [userId]);
-                };
-                Debug.print("End -----");
+                // switch(commentPositiveRatingsMap.get(commentId), commentNegativeRatingsMap.get(commentId)){
+                //     case (?positiveRatingMap, ?negativeRatingMap){
+                //         Debug.print(Nat.toText(positiveRatingMap.size()));
+                //         Debug.print(Nat.toText(negativeRatingMap.size()));
+                //         for((userId, _) in positiveRatingMap.entries()) {
+                //             Debug.print(Principal.toText(userId));
+                //             positiveRatingsArray := Array.append<Types.UserId>(
+                //                 positiveRatingsArray,
+                //                 [userId]
+                //             );
+                //         };
+                //         for((userId, _) in negativeRatingMap.entries()){
+                //             Debug.print(Principal.toText(userId));
+                //             negativeRatingsArray := Array.append<Types.UserId>(
+                //                 negativeRatingsArray,
+                //                 [userId]
+                //             );
+                //         };
+                //     };
+                //     case _ {};
+                // };
                 commentsArray := Array.append<
                     {commentId: Types.CommentId; ratings:{positiveRatings:[Types.UserId];negativeRatings:[Types.UserId]}}
                 >(
@@ -158,6 +223,7 @@ actor {
                 ]
             );
         };
+        Debug.print("End -------");
         return returnArray;
     };
 }
