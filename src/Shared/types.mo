@@ -130,12 +130,22 @@ module {
         callback: shared SubscriptionCommentEvent -> ();
     };
 
+    // for subscription of reputation score events
+    public type SubscriptionReputationScoreEvent = {
+        #didUpdateLeadershipBoard: [{userId: UserId; reputationScoreObj: ReputationScore}];
+    };
+
+    public type SubscribeReputationScoreEventsData = {
+        callback: shared SubscriptionReputationScoreEvent -> ();
+    };
+
     // Reputation score
     public type ReputationScore = {
         userId: UserId;
         authorScore: Float;
         raterScore: Float;
         timestamp: Timestamp;
+        reputationScore: Float;
     };
 
     public type LeadershipBoard = HashMap.HashMap<Timestamp, HashMap.HashMap<UserId, ReputationScore>>;

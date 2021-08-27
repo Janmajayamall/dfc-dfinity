@@ -18,6 +18,8 @@ actor DfcReputationScorer {
     let commentsRatingDataMap = HashMap.HashMap<Types.CommentId, {commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}>(1, Nat.equal, Hash.hash);
     var latestTimestamp: Types.Timestamp = Time.now();
 
+    var reputationScoreEventSubscribers: [Types.SubscribeReputationScoreEventsData] = [];
+
     public shared func init(): async () {
         DfcData.subscribeRatingEvents({
             callback = callbackForRatingEvent;
@@ -117,8 +119,9 @@ actor DfcReputationScorer {
         let usersDataForRaterScore: Types.UsersDataForRaterScore = await DfcUsersData.getUsersDataForRaterScore();
         let usersRaterScoreMap = _calculateRaterScores(usersDataForRaterScore);
 
-        // store the reputation score by timestamp (I guess 2d hashmap?)
+        // store the reputation score by timestamp
         let reputationScoreMap = HashMap.HashMap<Types.UserId, Types.ReputationScore>(1, Principal.equal, Principal.hash);
+        var reputationScoreArray: [{userId: Types.UserId; reputationScoreObj: Types.ReputationScore}] = [];
         for ((userId, {authorScore}) in usersAuthorScoreMap.entries()){
             switch(usersRaterScoreMap.get(userId)){
                 case (?{raterScore}){
@@ -131,6 +134,11 @@ actor DfcReputationScorer {
                         reputationScore = reputationScore;
                     };
                     reputationScoreMap.put(userId, reputationScoreObj);
+                    reputationScoreArray := Array.append<
+                        {userId: Types.UserId; reputationScoreObj: Types.ReputationScore}
+                    >(reputationScoreArray, [
+                        {userId = userId; reputationScoreObj = reputationScoreObj}
+                    ]);
                 };
                 case _ {
 
@@ -139,6 +147,8 @@ actor DfcReputationScorer {
         };
         latestTimestamp := startTimestamp;
         leadershipBoardMap.put(startTimestamp, reputationScoreMap);
+
+        publishReputationScoreEvents(#didUpdateLeadershipBoard(reputationScoreArray));
     };
  
     public shared func callbackForRatingEvent(ratingEvent: Types.SubscriptionRatingEvent) {
@@ -156,6 +166,16 @@ actor DfcReputationScorer {
                 };
                 commentsRatingDataMap.put(updateValue.commentId, newRatingData);
             };
+        };
+    };
+
+    public shared func subscribeReputationScoreEvents(data: Types.SubscribeReputationScoreEventsData){
+        reputationScoreEventSubscribers := Array.append<Types.SubscribeReputationScoreEventsData>(reputationScoreEventSubscribers, [data]);
+    };
+
+    public shared func publishReputationScoreEvents(reputationScoreEvent: Types.SubscriptionReputationScoreEvent){
+        for (data in reputationScoreEventSubscribers.vals()){
+            data.callback(reputationScoreEvent);
         };
     };
 
