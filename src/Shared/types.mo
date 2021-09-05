@@ -156,4 +156,12 @@ module {
     public type UsersAuthorScoreMap = HashMap.HashMap<UserId, {authorScore: Float}>;
     public type UsersDataForRaterScore = [{userId: UserId; userValidRatings: [Rating]}];
     public type UsersRaterScoreMap = HashMap.HashMap<UserId, {raterScore: Float}>;
+
+    // token
+    public type TokenError = {
+        #insufficientBalance;
+        #insufficientAllowance;
+        #minterNotAdmin;
+        #unknownFail;
+    }
 };

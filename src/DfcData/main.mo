@@ -187,8 +187,8 @@ actor DfcData {
     };
 
     public shared (msg) func rateComment(contentId: Types.ContentId, commentId: Types.CommentId, rating: Bool): async Result.Result<Types.Rating, Types.CommentId> {
-        switch (commentRatingMap.get(commentId), _getCommentOfContentId(contentId, commentId)) {
-            case (?commentRatings, #ok(commentObj)){
+        switch (commentRatingMap.get(commentId), _getCommentOfContentId(contentId, commentId), await DfcUsers.getUserProfile(msg.caller)) {
+            case (?commentRatings, #ok(commentObj), #ok(userProfile)){
                 var validRating: Bool = false;
                 if(commentRatings.size() <= 5){
                     validRating := true;

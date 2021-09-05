@@ -5,172 +5,199 @@ import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 import Debug "mo:base/Debug";
+import Result "mo:base/Result";
 import Types "./../Shared/types";
 import DfcData "canister:DfcData";
 
-actor class DfcToken {
+actor DfcToken {
+    let admin: Principal = Principal.fromText("lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae");
 
-    private let _balances = HashMap.HashMap<Types.CommentId, Types.Comment>(1, Nat.equal, Hash.hash);
-    private let _allowances = HashMap.HashMap<Types.UserId, HashMap.HashMap<Types.CommentId, Types.Rating>>(1, Principal.equal, Principal.hash);
-    private var _totalSupply: Nat = 100000000000000;
+    private let _balances = HashMap.HashMap<Types.UserId, Nat>(1, Principal.equal, Principal.hash);
+    private let _allowances = HashMap.HashMap<Types.UserId, HashMap.HashMap<Types.UserId, Nat>>(1, Principal.equal, Principal.hash);
+    private var _totalSupply: Nat = 0;
 
-    private var _name: String = "DfactCheck";
-    private var _symbol: String = "DFC";
+    private var _name: Text = "DFCToken";
+    private var _symbol: Text = "DFC";
 
-    public shared (msg) func transfer(){
-
-    };
-
-    public shared (msg) func transferFrom(){}
-
-    public shared (msg) func increaseAllowance(){}
-
-    public shared (msg) func decreaseAllowance(){}
-
-
-    public shared func init(): async () {
-        Debug.print(Principal.toText(owner));
-        Debug.print(Principal.toText(userId));
-        DfcData.subscribeUserDataEvents({
-            userId = userId;
-            callback = callbackForUserDataEvent;   
-        });
-    };
-
-    public shared func getReceivedRatingsMetadata(): async [Types.ReceivedRatingsFromUserMetadata] {
-        var metadataArray: [Types.ReceivedRatingsFromUserMetadata] = [];
-        for ((userId, commentRatingMap) in receivedRatings.entries()) {
-            var positiveRatings: Float = 0;
-            var negativeRatings: Float = 0;
-            var totalRatings: Float = 0;    
-            for ((commentId, ratingObj) in commentRatingMap.entries()){
-                if (ratingObj.rating == true){
-                    positiveRatings += 1;
-                }
-                else {
-                    negativeRatings += 1;
-                };  
-                totalRatings += 1;
+    func _transfer(sender: Principal, recipient: Principal, amount: Nat): Result.Result<Nat, Types.TokenError> {
+        switch(_balances.get(sender)){
+            case (?senderBalance){
+                if (senderBalance >= amount){
+                    let newSenderBalance = Nat.sub(senderBalance, amount);
+                    switch(_balances.get(recipient)){
+                        case(?recipientBalance){
+                            let newRecipientBalance = recipientBalance + amount;
+                            _balances.put(recipient, newRecipientBalance);
+                        };
+                        case _ {
+                            _balances.put(recipient, amount);
+                        };
+                    };
+                    _balances.put(sender, newSenderBalance);
+                    #ok(amount);
+                }else {
+                    #err(#insufficientBalance);
+                };
             };
-            metadataArray := Array.append<Types.ReceivedRatingsFromUserMetadata>(metadataArray, [{
-                userId = userId;
-                positiveRatings = positiveRatings;
-                negativeRatings = negativeRatings;
-                totalRatings = totalRatings; 
-            }]);
+            case _ {
+                #err(#insufficientBalance);
+            }
         };
-        return metadataArray;
     };
 
-    // public shared func calculateAuthorScore(authorScoresMap: Types.AuthorScoresMap): async Float {
-    //     var numerator: Float = 2;
-    //     var denominator: Float = 6;
-
-    //     for ((userId, ratingsMap) in receivedRatings.entries()){
-    //         switch (_calculateAverageReceivedRatingByUserId(userId), authorScoresMap.get(userId)){
-    //             case (?averageRatingByUser, ?userAuthorScore){
-    //                 let weightedAverage = userAuthorScore * averageRatingByUser;
-                    
-    //                 numerator += weightedAverage;
-    //                 denominator += userAuthorScore;
-    //             };
-    //             case _ {
-
-    //             };
-    //         };
-    //     };
-
-    //     let authorScore: Float = 1.5 * (numerator/denominator) - 0.5;
-    //     return authorScore;
-    // };
-
-    public shared func getUserValidRatings(): async [Types.Rating] {
-        var validRatings: [Types.Rating] = [];
-        for ((commentId, ratingValue) in userRatings.entries()){
-            if(ratingValue.validRating == true){
-                validRatings := Array.append<Types.Rating>(validRatings, [ratingValue]);
+    func _approve(owner: Principal, spender: Principal, amount: Nat): Bool {
+        switch(_allowances.get(owner)){
+            case null {
+                let newAllowanceMap = HashMap.HashMap<Types.UserId, Nat>(1, Principal.equal, Principal.hash);
+                newAllowanceMap.put(spender, amount);
+                _allowances.put(owner, newAllowanceMap);
+            };
+            case (?allowanceMap) {
+                allowanceMap.put(spender, amount);
             };
         };
-        return validRatings;
+        return true;
     };
 
-    public shared func callbackForUserDataEvent(commentEvent: Types.SubscriptionUserDataEvent) {
-        switch(commentEvent){
-            case (#didAddComment({commentAuthorUserId; comment})){
-                assert(commentAuthorUserId == userId);
-                userComments.put(comment.id, comment);
+    func _burn(account: Principal, amount: Nat): Result.Result<Nat, Types.TokenError>{
+        switch(_balances.get(account)){
+            case (?balance){
+                if (balance >= amount){
+                    let newBalance = Nat.sub(balance, amount);
+                    _balances.put(account, newBalance);
+                    _totalSupply -= amount;
+                    return #ok(amount);
+                }else{
+                    return #err(#insufficientBalance);
+                };
             };
-            case (#didDeleteComment({commentAuthorUserId; commentId})){
-                assert(commentAuthorUserId == userId);
-                userComments.delete(commentId);
+            case _ {
+                return #err(#insufficientBalance);
             };
-            case (#didReceiveRatingOnThyComment({commentAuthorUserId; raterUserId; rating})){
-                assert(commentAuthorUserId == userId);               
-                switch(receivedRatings.get(raterUserId)){
-                    case (?raterRatingsMap){
-                        raterRatingsMap.put(rating.commentId, rating);
+        };
+    };
+
+    func _mint(account: Principal, amount: Nat): Result.Result<Nat, Types.TokenError> {
+        if(Principal.equal(admin, account) == false){
+            return #err(#minterNotAdmin);
+        };
+
+        switch(_balances.get(admin)){
+            case(?balance){
+                let newBalance = balance + amount;
+                _balances.put(admin, newBalance);
+            };
+            case _ {
+                _balances.put(admin, amount);
+            };
+        };
+        
+        _totalSupply += amount;
+        
+        #ok(amount);
+    };
+
+    func _allowance(owner: Principal, spender: Principal): async Nat {
+        switch(_allowances.get(owner)){
+            case (?ownerAllowanceMap){
+                switch(ownerAllowanceMap.get(spender)){
+                    case (?allowance){
+                        return allowance;
                     };
                     case _ {
-                        let newRatingMap = HashMap.HashMap<Types.CommentId, Types.Rating>(1, Nat.equal, Hash.hash);
-                        newRatingMap.put(rating.commentId, rating);
-                        receivedRatings.put(raterUserId, newRatingMap);
+                        return 0;
                     };
                 };
             };
-            case (#didAddNewRating({raterUserId; rating})){
-                assert(raterUserId == userId);
-                userRatings.put(rating.commentId, rating);
+            case _ {
+                return 0;
             };
         };
     };
 
-    // test functions for CandidUI
-    public shared query func testGetUserComments(): async [Types.Comment] {
-        var commentArray: [Types.Comment] = [];
-        for ((commentId, comment) in userComments.entries()){
-            commentArray := Array.append<Types.Comment>(commentArray, [comment]);
-        };
-        return commentArray;
+    public shared query func name(): async Text {
+        return _name;
     };
 
-    public shared query func testReceivedRatings(): async [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}] {
-        var receivedRatingsArray: [{userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}] = [];
-        for ((userId, commentMap) in receivedRatings.entries()){
-            var comments: [{commentId: Types.CommentId; rating: Types.Rating}] = [];
-            for ((commentId, ratingObj) in commentMap.entries()){
-                comments := Array.append<
-                    {commentId: Types.CommentId; rating: Types.Rating}
-                >(comments, [{
-                    commentId = commentId;
-                    rating = ratingObj;
-                }]);
+    public shared query func symbol(): async Text {
+        return _symbol;
+    };
+
+    public shared query func decimals(): async Nat {
+        return 18;
+    };
+
+    public shared query func totalSupply(): async Nat {
+        return _totalSupply;
+    };
+
+    public shared query (msg) func balanceOf(): async Nat {
+        switch(_balances.get(msg.caller)){
+            case (?balance){
+                return balance;
             };
-            receivedRatingsArray := Array.append<
-                {userId: Types.UserId; comments:[{commentId: Types.CommentId; rating: Types.Rating}]}
-            >(
-                receivedRatingsArray,
-                [{
-                    userId = userId;
-                    comments = comments;
-                }]
-            );
+            case _ {
+                return 0;                
+            };
         };
-        return receivedRatingsArray;
     };
 
-    public shared query func testUserRatings(): async [{commentId: Types.CommentId; rating: Types.Rating}] {
-        var userRatingsArray: [{commentId: Types.CommentId; rating: Types.Rating}] = [];
-        for ((commentId, rating) in userRatings.entries()){
-            userRatingsArray := Array.append<
-                {commentId: Types.CommentId; rating: Types.Rating}
-            >(
-                userRatingsArray,
-                [{
-                    commentId = commentId;
-                    rating = rating;
-                }]
-            );
-        };
-        return userRatingsArray;
+    public shared query (msg) func allowance(owner: Principal, spender: Principal): async Nat {
+        return _allowance(owner, spender);
     };
+
+    public shared (msg) func transfer(recipient: Principal, amount: Nat): async Result.Result<Nat, Types.TokenError> {
+        return _transfer(msg.caller, recipient, amount);
+    };
+
+    public shared (msg) func transferFrom(sender: Principal, recipient: Principal, amount: Nat): async Result.Result<Nat, Types.TokenError>{
+        switch(_allowances.get(sender)){
+            case(?senderAllowanceMap){
+                switch(senderAllowanceMap.get(msg.caller)){
+                    case(?allowance){
+                        if(allowance >= amount){
+                            return _transfer(sender, recipient, amount);
+                        }else{
+                            #err(#insufficientAllowance);
+                        }
+                    };
+                    case _ {#err(#insufficientAllowance);};
+                };
+            };
+            case _ {
+                #err(#insufficientAllowance);
+            };
+        };
+    };
+
+    public shared (msg) func increaseAllowance(spender: Principal, addValue: Nat): async Result.Result<Bool, Types.TokenError> {
+        var existingAllowance: Nat = _allowance(msg.caller, spender);
+        if (_approve(msg.caller, spender, existingAllowance + addValue)){
+            #ok(true);
+        }else{
+            #err(#unknownFail);
+        }
+    };
+
+    public shared (msg) func decreaseAllowance(spender: Principal, subValue: Nat): async Result.Result<Bool, Types.TokenError> {
+        var existingAllowance: Nat = _allowance(msg.caller, spender);
+        if (existingAllowance < subValue){
+            return #err(#insufficientAllowance);
+        };
+        if (_approve(msg.caller, spender, existingAllowance - subValue)){
+            return #ok(true);
+        }else{
+            return #err(#unknownFail);
+        };
+    };
+
+    public shared (msg) func mint(amount: Nat): async Result.Result<Nat, Types.TokenError> {
+        return _mint(msg.caller, amount);
+    };
+
+    public shared (msg) func burn(amount: Nat): async Result.Result<Nat, Types.TokenError> {
+        return _burn(msg.caller, amount);
+    };
+
+    
 }

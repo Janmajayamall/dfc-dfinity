@@ -19,6 +19,10 @@
 		"DfcFeed": {
 			"main": "src/DfcFeed/main.mo",
 			"type": "motoko"
+		},
+		"DfcToken": {
+			"main": "src/DfcToken/main.mo",
+			"type": "motoko"
 		}
 	},
 	"defaults": {
