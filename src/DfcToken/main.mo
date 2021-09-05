@@ -97,7 +97,7 @@ actor DfcToken {
         #ok(amount);
     };
 
-    func _allowance(owner: Principal, spender: Principal): async Nat {
+    func _allowance(owner: Principal, spender: Principal): Nat {
         switch(_allowances.get(owner)){
             case (?ownerAllowanceMap){
                 switch(ownerAllowanceMap.get(spender)){
