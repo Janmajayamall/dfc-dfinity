@@ -161,7 +161,7 @@ module {
     public type TokenError = {
         #insufficientBalance;
         #insufficientAllowance;
-        #minterNotAdmin;
+        #notAdmin;
         #unknownFail;
     }
 };

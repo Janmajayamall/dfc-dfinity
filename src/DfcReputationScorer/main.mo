@@ -13,6 +13,7 @@ import DfcUsersData "canister:DfcUsersData";
 import Types "./../Shared/types";
 
 actor DfcReputationScorer {
+    let admin: Principal = Principal.fromText("lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae");
 
     let leadershipBoardMap = HashMap.HashMap<Types.Timestamp, HashMap.HashMap<Types.UserId, Types.ReputationScore>>(1, Int.equal, Int.hash);
     let commentsRatingDataMap = HashMap.HashMap<Types.CommentId, {commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}>(1, Nat.equal, Hash.hash);
@@ -111,6 +112,22 @@ actor DfcReputationScorer {
         return usersRaterScoreMap;
     };
 
+    /* Not marked as query for more security */
+    public shared func getLatestLeadershipBoard(): async [Types.ReputationScore] {
+        switch(leadershipBoardMap.get(latestTimestamp)){
+            case(?leadershipBoard){
+                var reputationScores: [Types.ReputationScore] = [];
+                for((userId, reputationScore) in leadershipBoard.entries()){
+                    reputationScores := Array.append<Types.ReputationScore>(reputationScores, [reputationScore]);
+                };
+                return reputationScores;
+            };
+            case _ {
+                return [];
+            };
+        };
+    };
+
     public shared func calculateReputationScore() {
         let startTimestamp: Types.Timestamp = Time.now();
         let usersDataForAuthorScore: Types.UsersDataForAuthorScore = await DfcUsersData.getUsersDataForAuthorScore();
@@ -178,6 +195,7 @@ actor DfcReputationScorer {
             data.callback(reputationScoreEvent);
         };
     };
+
 
     // test functions for __Candid_UI
     public shared query func testCommentsRatingDataMap(): async [{commentId: Types.CommentId; positiveRatings: Int; negativeRatings: Int}] {

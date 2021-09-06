@@ -6,8 +6,11 @@ import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 import Debug "mo:base/Debug";
 import Result "mo:base/Result";
+import Int64 "mo:base/Int64";
+import Nat64 "mo:base/Nat64";
 import Types "./../Shared/types";
 import DfcData "canister:DfcData";
+import DfcReputationScorer "canister:DfcReputationScorer";
 
 actor DfcToken {
     let admin: Principal = Principal.fromText("lplep-yvd5p-rlk4w-toc45-jry63-kgc7g-dh3sp-akopa-5ukwz-i3crd-gae");
@@ -18,6 +21,14 @@ actor DfcToken {
 
     private var _name: Text = "DFCToken";
     private var _symbol: Text = "DFC";
+
+    func _convertNatToFloat(val: Nat): Float {
+        return Float.fromInt64((Int64.fromNat64(Nat64.fromNat(val))));
+    };
+
+    func _convertFloatToNat(val: Float): Nat {
+        return Nat64.toNat(Int64.toNat64(Float.toInt64(val)));
+    };
 
     func _transfer(sender: Principal, recipient: Principal, amount: Nat): Result.Result<Nat, Types.TokenError> {
         switch(_balances.get(sender)){
@@ -79,9 +90,8 @@ actor DfcToken {
 
     func _mint(account: Principal, amount: Nat): Result.Result<Nat, Types.TokenError> {
         if(Principal.equal(admin, account) == false){
-            return #err(#minterNotAdmin);
+            return #err(#notAdmin);
         };
-
         switch(_balances.get(admin)){
             case(?balance){
                 let newBalance = balance + amount;
@@ -199,5 +209,26 @@ actor DfcToken {
         return _burn(msg.caller, amount);
     };
 
-    
+    public shared (msg) func mindAndReward(amount: Nat): async Result.Result<Nat, Types.TokenError> {
+        switch(_mint(msg.caller, amount)){
+            case(#ok(_)){
+                // distribute rewards
+                let reputationScores = await DfcReputationScorer.getLatestLeadershipBoard();
+                var totalScores: Float = 0;
+                let amountFloat = _convertNatToFloat(amount);
+                for(score in reputationScores.vals()){
+                    totalScores += score.reputationScore;
+                };
+                for(score in reputationScores.vals()){
+                    let userShare: Float = (score.reputationScore / totalScores) * amountFloat;
+                    let userShareNat = _convertFloatToNat(userShare);
+                    let _ = _transfer(msg.caller, score.userId, userShareNat);
+                };
+                return #ok(amount)
+            };
+            case (#err(tokenError)) {
+                return #err(tokenError);
+            };
+        };
+    };
 }
