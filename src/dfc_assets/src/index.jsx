@@ -1,16 +1,9 @@
 import * as React from "react";
 import { render } from "react-dom";
 import FeedItem from "./components/FeedItem";
-import {
-	addComment,
-	getFeed,
-	lookupUser,
-	flagContent,
-} from "./dfx_canister_calls";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import { ProfileModal } from "./components/ProfileModal";
 import IconButton from "@material-ui/core/IconButton";
 import PersonIcon from "@material-ui/icons/Person";
@@ -18,6 +11,37 @@ import AddIcon from "@material-ui/icons/Add";
 import Fab from "@material-ui/core/Fab";
 import { NewContentModal } from "./components/NewContentModal";
 import { colorScheme } from "./utils";
+import {
+	BrowserRouter as Router,
+	Switch,
+	Route,
+	Link,
+	useRouteMatch,
+	useParams,
+} from "react-router-dom";
+
+const RouterTesting = () => {
+	return (
+		<Router>
+			<Switch>
+				<Route path="/dad">
+					<Page2 />
+				</Route>
+				<Route path="/" exact={true}>
+					<Page1 />
+				</Route>
+			</Switch>
+		</Router>
+	);
+};
+
+const Page1 = () => {
+	return <div>Hello from Page 1</div>;
+};
+
+const Page2 = () => {
+	return <div>Hello from Page 2</div>;
+};
 
 const Feed = () => {
 	const [feed, setFeed] = React.useState([]);
@@ -280,7 +304,7 @@ const Feed = () => {
 
 const App = () => {
 	const [pageState, setPageState] = React.useState(0);
-	return <Feed />;
+	return <RouterTesting />;
 };
 
 render(<App />, document.getElementById("app"));
@@ -291,3 +315,12 @@ render(<App />, document.getElementById("app"));
 
 // 	document.getElementById("greeting").innerText = greeting;
 // });
+
+// Work to do
+// 1. Setup react router
+// 2. Setup react state
+// 3. UI for 2 different feeds
+// 4. Pop up for flagging new content
+// 5. Page for leadership board
+// 6. Page for individual's past scores
+// 7. Profile page

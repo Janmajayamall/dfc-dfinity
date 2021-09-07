@@ -23,6 +23,14 @@
 		"DfcToken": {
 			"main": "src/DfcToken/main.mo",
 			"type": "motoko"
+		},
+		"dfc_assets": {
+			"dependencies": ["DfcData"],
+			"frontend": {
+				"entrypoint": "src/dfc_assets/src/index.html"
+			},
+			"source": ["src/dfc_assets/assets", "dist/dfc_assets/"],
+			"type": "assets"
 		}
 	},
 	"defaults": {

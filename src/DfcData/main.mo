@@ -130,8 +130,8 @@ actor DfcData {
     };
 
     // public update functions
-    public shared (msg) func flagNewContent(url: Text): async Types.Content {
-        // check user's token balance
+    public shared (msg) func flagNewContent(url: Text, tokensBurnt: Nat): async Types.Content {
+        /* Tokens Burnt functionality is disabled rn */
 
         let contentId = contentIdCount;
         contentIdCount += 1;
@@ -140,7 +140,7 @@ actor DfcData {
             id = contentId;
             url = url; 
             time = Time.now();
-            tokensBurnt = 0;
+            tokensBurnt = tokensBurnt;
         };
         contentMap.put(contentId, newContent);
         contentCommentMap.put(contentId, HashMap.HashMap<Types.CommentId, Types.Comment>(1, Nat.equal, Hash.hash));
