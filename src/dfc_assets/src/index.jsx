@@ -11,36 +11,21 @@ import AddIcon from "@material-ui/icons/Add";
 import Fab from "@material-ui/core/Fab";
 import { NewContentModal } from "./components/NewContentModal";
 import { colorScheme } from "./utils";
-import {
-	BrowserRouter as Router,
-	Switch,
-	Route,
-	Link,
-	useRouteMatch,
-	useParams,
-} from "react-router-dom";
+import store from "./store";
+import { Provider, useSelector, useDispatch } from "react-redux";
+import { selectScreen, changeScreen, SCREEN_SELECTOR } from "./reducers/screen";
+import FeedScreen from "./pages/FeedScreen";
 
-const RouterTesting = () => {
-	return (
-		<Router>
-			<Switch>
-				<Route path="/dad">
-					<Page2 />
-				</Route>
-				<Route path="/" exact={true}>
-					<Page1 />
-				</Route>
-			</Switch>
-		</Router>
-	);
-};
+const Page = () => {
+	const screen = useSelector(selectScreen);
+	const dispatch = useDispatch();
+	console.log(screen);
 
-const Page1 = () => {
-	return <div>Hello from Page 1</div>;
-};
+	if (screen === SCREEN_SELECTOR.main) {
+		return <FeedScreen />;
+	}
 
-const Page2 = () => {
-	return <div>Hello from Page 2</div>;
+	return <div />;
 };
 
 const Feed = () => {
@@ -303,8 +288,11 @@ const Feed = () => {
 };
 
 const App = () => {
-	const [pageState, setPageState] = React.useState(0);
-	return <RouterTesting />;
+	return (
+		<Provider store={store}>
+			<Page />
+		</Provider>
+	);
 };
 
 render(<App />, document.getElementById("app"));
@@ -319,6 +307,7 @@ render(<App />, document.getElementById("app"));
 // Work to do
 // 1. Setup react router
 // 2. Setup react state
+// setup interaction with backend
 // 3. UI for 2 different feeds
 // 4. Pop up for flagging new content
 // 5. Page for leadership board
