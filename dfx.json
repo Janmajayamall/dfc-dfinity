@@ -25,7 +25,14 @@
 			"type": "motoko"
 		},
 		"dfc_assets": {
-			"dependencies": ["DfcData"],
+			"dependencies": [
+				"DfcData",
+				"DfcFeed",
+				"DfcUsers",
+				"DfcUsersData",
+				"DfcReputationScorer",
+				"DfcToken"
+			],
 			"frontend": {
 				"entrypoint": "src/dfc_assets/src/index.html"
 			},

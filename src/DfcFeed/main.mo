@@ -80,6 +80,24 @@ actor {
         };
     };
 
+    // query functions
+    public query func getNeedsHelpFeedContentIds(): async [Types.ContentId] {
+        var contentIds: [Types.ContentId] = [];
+        for ((id, content) in needsHelpFeedMap.entries()){
+            contentIds := Array.append<Types.ContentId>(contentIds, [content.id]);
+        };
+        return contentIds;
+    };
+
+    public query func  getSatisfiedFeedContentIds(): async [Types.ContentId] {
+        var contentIds: [Types.ContentId] = [];
+        for ((id, content) in satisfiedFeedMap.entries()){
+            contentIds := Array.append<Types.ContentId>(contentIds, [content.id]);
+        };
+        return contentIds;
+    };
+
+    // mutation function
     public func init() {
         DfcData.subscribeRatingEvents({callback = callbackForRatingEvent});
         DfcData.subscribeCommentEvents({callback = callbackForCommentEvent});
@@ -100,6 +118,7 @@ actor {
         };
     };
 
+    // callbacks
     public func callbackForCommentEvent(commentEvent: Types.SubscriptionCommentEvent){
         switch(commentEvent){
             case(#didAddComment(newComment)){
