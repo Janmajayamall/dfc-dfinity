@@ -1,0 +1,32 @@
+type TokenError = 
+ variant {
+   insufficientAllowance;
+   insufficientBalance;
+   notAdmin;
+   unknownFail;
+ };
+type Result_1 = 
+ variant {
+   err: TokenError;
+   ok: bool;
+ };
+type Result = 
+ variant {
+   err: TokenError;
+   ok: nat;
+ };
+service : {
+  allowance: (principal, principal) -> (nat) query;
+  balanceOf: () -> (nat) query;
+  burn: (nat) -> (Result);
+  decimals: () -> (nat) query;
+  decreaseAllowance: (principal, nat) -> (Result_1);
+  increaseAllowance: (principal, nat) -> (Result_1);
+  mindAndReward: (nat) -> (Result);
+  mint: (nat) -> (Result);
+  name: () -> (text) query;
+  symbol: () -> (text) query;
+  totalSupply: () -> (nat) query;
+  transfer: (principal, nat) -> (Result);
+  transferFrom: (principal, principal, nat) -> (Result);
+}

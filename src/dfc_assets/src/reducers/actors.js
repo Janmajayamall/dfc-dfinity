@@ -1,12 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-	idlFactory as DFC_DATA_IDL,
-	canisterId as DFC_DATA_ID,
-} from "dfx-generated/DfcData";
-import {
-	idlFactory as DFC_FEED_IDL,
-	canisterId as DFC_FEED_ID,
-} from "dfx-generated/DfcData";
+	canisterId as dfcDataCanisterId,
+	createActor as dfcDataCreateActor,
+} from "./../../../declarations/DfcData/index";
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 const initialState = {
@@ -30,13 +26,12 @@ export const actorsSlice = createSlice({
 			const { identity } = action.payload;
 			const agent = new HttpAgent();
 			// create actors
-			const DfcData = createActor(DFC_DATA_ID, DFC_DATA_IDL, {}, agent);
-			const DfcFeed = createActor(DFC_FEED_ID, DFC_FEED_IDL, {}, agent);
+			const DfcData = dfcDataCreateActor(dfcDataCanisterId);
+			// const DfcFeed = createActor(DFC_FEED_ID, DFC_FEED_IDL, {}, agent);
 
 			// assign actors to state
 			state = {
 				DfcData,
-				DfcFeed,
 			};
 		},
 	},

@@ -1,0 +1,143 @@
+type UserId = principal;
+type Timestamp = int;
+type SubscriptionUserDataEvent = 
+ variant {
+   didAddComment: record {
+                    comment: Comment;
+                    commentAuthorUserId: UserId;
+                  };
+   didAddNewRating: record {
+                      raterUserId: UserId;
+                      rating: Rating;
+                    };
+   didDeleteComment:
+    record {
+      commentAuthorUserId: UserId;
+      commentId: CommentId;
+    };
+   didReceiveRatingOnThyComment:
+    record {
+      commentAuthorUserId: UserId;
+      raterUserId: UserId;
+      rating: Rating;
+    };
+ };
+type SubscriptionRatingEvent = variant {didUpdateRating: RatingUpdate;};
+type SubscriptionContentEvent = variant {
+                                  didFlagNewContent:
+                                   record {
+                                     content: Content;
+                                     contentId: ContentId;
+                                   };};
+type SubscriptionCommentEvent = variant {
+                                  didAddComment:
+                                   record {
+                                     comment: Comment;
+                                     commentId: CommentId;
+                                     contentId: ContentId;
+                                   };};
+type SubscribeUserDataEventsData = 
+ record {
+   callback: func (SubscriptionUserDataEvent) -> () oneway;
+   userId: UserId;
+ };
+type SubscribeRatingEventsData = record {
+                                   callback:
+                                    func (SubscriptionRatingEvent) ->
+                                     () oneway;};
+type SubscribeContentEventsData = record {
+                                    callback:
+                                     func (SubscriptionContentEvent) ->
+                                      () oneway;};
+type SubscribeCommentEventsData = record {
+                                    callback:
+                                     func (SubscriptionCommentEvent) ->
+                                      () oneway;};
+type Result_2 = 
+ variant {
+   err: NewCommentError;
+   ok: Comment;
+ };
+type Result_1 = 
+ variant {
+   err: ContentId;
+   ok: ContentDetails;
+ };
+type Result = 
+ variant {
+   err: CommentId;
+   ok: Rating;
+ };
+type RatingValue = bool;
+type RatingUpdate = 
+ record {
+   commentId: CommentId;
+   contentId: ContentId;
+   negativeDelta: int;
+   positiveDelta: int;
+   ratingObj: Rating;
+ };
+type Rating = 
+ record {
+   commentId: CommentId;
+   rating: RatingValue;
+   userId: UserId;
+   validRating: bool;
+ };
+type NewCommentError = 
+ variant {
+   idDoesNotExists: ID;
+   profileDoesNotExists: principal;
+   unknown;
+ };
+type ID = nat;
+type ContentId = nat;
+type ContentDetails = 
+ record {
+   comments: vec CommentDetails;
+   id: ContentId;
+   time: Timestamp;
+   tokensBurnt: nat;
+   url: text;
+ };
+type Content = 
+ record {
+   id: ContentId;
+   time: Timestamp;
+   tokensBurnt: nat;
+   url: text;
+ };
+type CommentId = nat;
+type CommentDetails = 
+ record {
+   contentId: ContentId;
+   id: CommentId;
+   ratings: vec Rating;
+   "text": text;
+   userId: UserId;
+   username: text;
+ };
+type Comment = 
+ record {
+   contentId: ContentId;
+   id: CommentId;
+   "text": text;
+   userId: UserId;
+   username: text;
+ };
+service : {
+  addComment: (text, ContentId) -> (Result_2);
+  flagNewContent: (text, nat) -> (Content);
+  getContentDetails: (ContentId) -> (Result_1) query;
+  getContentDetailsInBatch: (vec ContentId) -> (vec ContentDetails) query;
+  getMyPrincipal: () -> (principal);
+  publishCommentEvent: (SubscriptionCommentEvent) -> () oneway;
+  publishContentEvent: (SubscriptionContentEvent) -> () oneway;
+  publishRatingEvent: (SubscriptionRatingEvent) -> () oneway;
+  publishUserDataEvent: (vec UserId, SubscriptionUserDataEvent) -> () oneway;
+  rateComment: (ContentId, CommentId, bool) -> (Result);
+  subscribeCommentEvents: (SubscribeCommentEventsData) -> () oneway;
+  subscribeContentEvents: (SubscribeContentEventsData) -> () oneway;
+  subscribeRatingEvents: (SubscribeRatingEventsData) -> () oneway;
+  subscribeUserDataEvents: (SubscribeUserDataEventsData) -> () oneway;
+}

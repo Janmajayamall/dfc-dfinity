@@ -1,0 +1,36 @@
+type UserId = principal;
+type SubscriptionUserProfileEvent = variant {
+                                      didRegisterNewUser:
+                                       record {
+                                         profile: Profile;
+                                         userId: UserId;
+                                       };};
+type SubscribeUserProfileEventsData = record {
+                                        callback:
+                                         func
+                                          (SubscriptionUserProfileEvent) ->
+                                          () oneway;};
+type Result = 
+ variant {
+   err: ProfileError;
+   ok: Profile;
+ };
+type ProfileError = 
+ variant {
+   profileDoesNotExists: principal;
+   userAlreadyExists: UserId;
+   usernameAlreadyExists: text;
+ };
+type Profile = 
+ record {
+   userId: UserId;
+   username: text;
+ };
+service : {
+  getAllUsers: () -> (vec Profile);
+  getMyPrincipal: () -> (principal);
+  getUserProfile: (UserId) -> (Result) query;
+  publishUserProfileEvent: (SubscriptionUserProfileEvent) -> () oneway;
+  registerUser: (text) -> (Result);
+  subscribeUserProfileEvents: (SubscribeUserProfileEventsData) -> () oneway;
+}

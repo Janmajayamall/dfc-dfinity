@@ -1,0 +1,59 @@
+type UserId = principal;
+type Timestamp = int;
+type SubscriptionReputationScoreEvent = variant {
+                                          didUpdateLeadershipBoard:
+                                           vec
+                                            record {
+                                              reputationScoreObj:
+                                               ReputationScore;
+                                              userId: UserId;
+                                            };};
+type SubscriptionRatingEvent = variant {didUpdateRating: RatingUpdate;};
+type SubscribeReputationScoreEventsData = record {
+                                            callback:
+                                             func
+                                              (SubscriptionReputationScoreEvent) ->
+                                              () oneway;};
+type ReputationScore = 
+ record {
+   authorScore: float64;
+   raterScore: float64;
+   reputationScore: float64;
+   timestamp: Timestamp;
+   userId: UserId;
+ };
+type RatingValue = bool;
+type RatingUpdate = 
+ record {
+   commentId: CommentId;
+   contentId: ContentId;
+   negativeDelta: int;
+   positiveDelta: int;
+   ratingObj: Rating;
+ };
+type Rating = 
+ record {
+   commentId: CommentId;
+   rating: RatingValue;
+   userId: UserId;
+   validRating: bool;
+ };
+type ContentId = nat;
+type CommentId = nat;
+service : {
+  calculateReputationScore: () -> () oneway;
+  callbackForRatingEvent: (SubscriptionRatingEvent) -> () oneway;
+  getLatestLeadershipBoard: () -> (vec ReputationScore);
+  init: () -> ();
+  publishReputationScoreEvents: (SubscriptionReputationScoreEvent) ->
+   () oneway;
+  subscribeReputationScoreEvents: (SubscribeReputationScoreEventsData) ->
+   () oneway;
+  testCommentsRatingDataMap: () ->
+   (vec
+     record {
+       commentId: CommentId;
+       negativeRatings: int;
+       positiveRatings: int;
+     }) query;
+}

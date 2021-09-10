@@ -1,0 +1,84 @@
+type UsersDataForRaterScore = 
+ vec record {
+       userId: UserId;
+       userValidRatings: vec Rating;
+     };
+type UsersDataForAuthorScore = 
+ vec
+  record {
+    receivedRatingsMetadataArray: vec ReceivedRatingsFromUserMetadata;
+    userId: UserId;
+  };
+type UserId = principal;
+type SubscriptionUserProfileEvent = variant {
+                                      didRegisterNewUser:
+                                       record {
+                                         profile: Profile;
+                                         userId: UserId;
+                                       };};
+type ReceivedRatingsFromUserMetadata = 
+ record {
+   negativeRatings: float64;
+   positiveRatings: float64;
+   totalRatings: float64;
+   userId: UserId;
+ };
+type RatingValue = bool;
+type Rating = 
+ record {
+   commentId: CommentId;
+   rating: RatingValue;
+   userId: UserId;
+   validRating: bool;
+ };
+type Profile = 
+ record {
+   userId: UserId;
+   username: text;
+ };
+type ContentId = nat;
+type CommentId = nat;
+type Comment = 
+ record {
+   contentId: ContentId;
+   id: CommentId;
+   "text": text;
+   userId: UserId;
+   username: text;
+ };
+service : {
+  callbackForUserProfileEvent: (SubscriptionUserProfileEvent) -> () oneway;
+  getMyPrincipal: () -> (principal);
+  getUsersDataForAuthorScore: () -> (UsersDataForAuthorScore);
+  getUsersDataForRaterScore: () -> (UsersDataForRaterScore);
+  init: () -> ();
+  testAllUsers: () -> (vec UserId);
+  testAllUsersRatings: () ->
+   (vec
+     record {
+       ratings: vec record {
+                      commentId: CommentId;
+                      rating: Rating;
+                    };
+       userId: UserId;
+     });
+  testAllUsersReceivedRatings: () ->
+   (vec
+     record {
+       receivedRatings:
+        vec
+         record {
+           comments: vec record {
+                           commentId: CommentId;
+                           rating: Rating;
+                         };
+           userId: UserId;
+         };
+       userId: UserId;
+     });
+  testGetAllUsersComments: () ->
+   (vec record {
+          comments: vec Comment;
+          userId: UserId;
+        });
+}

@@ -11,7 +11,7 @@ const Page = () => {
 		satisfiedFeed: [],
 	});
 
-	React.useEffect(() => {
+	React.useEffect(async () => {
 		console.log("this ran");
 		if (actors.DfcData && actors.DfcFeed) {
 			let feed = await getAllFeed(actors.DfcData, actors.DfcFeed);

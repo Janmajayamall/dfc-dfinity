@@ -2,6 +2,9 @@ const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
+
+let localCanisters, prodCanisters, canisters;
 
 function initCanisterIds() {
 	try {
@@ -46,9 +49,7 @@ module.exports = {
 	entry: {
 		// The frontend.entrypoint points to the HTML file for this build, so we need
 		// to replace the extension to `.js`.
-		index: path
-			.join(__dirname, info.frontend.entrypoint)
-			.replace(/\.html$/, ".jsx"),
+		index: path.join(__dirname, asset_entry).replace(/\.html$/, ".jsx"),
 	},
 	devtool: isDevelopment ? "source-map" : false,
 	optimization: {
