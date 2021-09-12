@@ -3,20 +3,11 @@ import {
 	canisterId as dfcDataCanisterId,
 	createActor as dfcDataCreateActor,
 } from "./../../../declarations/DfcData/index";
-import { Actor, HttpAgent } from "@dfinity/agent";
 
 const initialState = {
 	DfcData: undefined,
 	DfcFeed: undefined,
 };
-
-function createActor(canisterId, idlFactory, options, agent) {
-	return Actor.createActor(idlFactory, {
-		agent,
-		canisterId,
-		...options,
-	});
-}
 
 export const actorsSlice = createSlice({
 	name: "actors",
@@ -24,15 +15,18 @@ export const actorsSlice = createSlice({
 	reducers: {
 		initActors: (state, action) => {
 			const { identity } = action.payload;
-			const agent = new HttpAgent();
 			// create actors
-			const DfcData = dfcDataCreateActor(dfcDataCanisterId);
+			const DfcData = dfcDataCreateActor(dfcDataCanisterId, {
+				agentOptions: {
+					identity: identity,
+				},
+			});
 			// const DfcFeed = createActor(DFC_FEED_ID, DFC_FEED_IDL, {}, agent);
 
 			// assign actors to state
-			state = {
+			return (state = {
 				DfcData,
-			};
+			});
 		},
 	},
 });

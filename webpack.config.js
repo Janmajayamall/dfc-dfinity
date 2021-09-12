@@ -104,7 +104,7 @@ module.exports = {
 			DFC_FEED_ID: canisters["DfcFeed"],
 			DFC_TOKEN_ID: canisters["DfcToken"],
 			II_URL: isDevelopment
-				? "http://localhost:8000?canisterId=r7inp-6aaaa-aaaaa-aaabq-cai#authorize"
+				? "http://localhost:8000?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai#authorize"
 				: "https://identity.ic0.app/#authorize",
 		}),
 		new webpack.ProvidePlugin({

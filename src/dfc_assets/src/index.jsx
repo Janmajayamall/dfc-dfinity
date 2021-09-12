@@ -1,31 +1,71 @@
 import * as React from "react";
-// import FeedItem from "./components/FeedItem";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-// import AppBar from "@material-ui/core/AppBar";
-// import Toolbar from "@material-ui/core/Toolbar";
-// import { ProfileModal } from "./components/ProfileModal";
-// import IconButton from "@material-ui/core/IconButton";
-// import PersonIcon from "@material-ui/icons/Person";
-// import AddIcon from "@material-ui/icons/Add";
-// import Fab from "@material-ui/core/Fab";
-// import { NewContentModal } from "./components/NewContentModal";
-// import { colorScheme } from "./utils";
+// import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { render } from "react-dom";
 import store from "./store";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { selectScreen, changeScreen, SCREEN_SELECTOR } from "./reducers/screen";
 import FeedScreen from "./pages/FeedScreen";
 import { initActors } from "./reducers/actors";
+import { AuthClient } from "@dfinity/auth-client";
+import { selectAuth, updateAuthState } from "./reducers/auth";
+import TopBar from "./components/TopBar";
 
 const Page = () => {
+	const [authState, setAuthState] = React.useState({});
+
 	const screen = useSelector(selectScreen);
+	const globalAuthState = useSelector(selectAuth);
 	const dispatch = useDispatch();
 
 	React.useEffect(() => {
-		useDispatch(initActors());
-	});
+		dispatch(
+			updateAuthState({
+				authClient: authState.authClient,
+				isAuthenticated: authState.isAuthenticated,
+			})
+		);
+	}, [authState]);
+
+	React.useEffect(async () => {
+		AuthClient.create().then(async (client) => {
+			if (await client.isAuthenticated()) {
+				setAuthState({
+					authClient: client,
+					isAuthenticated: true,
+				});
+			} else {
+				setAuthState({
+					authClient: client,
+					isAuthenticated: true,
+				});
+			}
+			dispatch(
+				initActors({
+					identity: client.getIdentity(),
+				})
+			);
+		});
+	}, []);
+
+	function login() {
+		authState.authClient?.login({
+			identityProvider: process.env.II_URL,
+			onSuccess: () => {
+				setAuthState({
+					authClient: client,
+					isAuthenticated: true,
+				});
+			},
+		});
+	}
 
 	if (screen === SCREEN_SELECTOR.main) {
-		return <FeedScreen />;
+		return (
+			<div>
+				<TopBar authState={authState} login={login} />
+				<FeedScreen />
+			</div>
+		);
 	}
 
 	return <div />;
@@ -253,7 +293,7 @@ render(<App />, document.getElementById("app"));
 
 // 	return (
 // 		<div style={{ flex: 1, backgroundColor: colorScheme.primary }}>
-// 			<AppBar position="static">
+// 			<TopBar position="static">
 // 				<Toolbar
 // 					style={{
 // 						display: "flex",
@@ -270,7 +310,7 @@ render(<App />, document.getElementById("app"));
 // 						/>
 // 					</IconButton>
 // 				</Toolbar>
-// 			</AppBar>
+// 			</TopBar>
 // 			<div
 // 				style={{
 // 					display: "flex",

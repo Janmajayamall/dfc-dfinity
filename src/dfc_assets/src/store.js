@@ -11,4 +11,15 @@ export default configureStore({
 		auth: authReducer,
 		screen: screenReducer,
 	},
+	middleware: (getDefaultMiddleware) =>
+		getDefaultMiddleware({
+			serializableCheck: {
+				// Ignore these action types
+				ignoredActions: ["actors/initActors", "auth/updateAuthState"],
+				// Ignore these field paths in all actions
+				// ignoredActionPaths: ["meta.arg", "payload.timestamp"],
+				// Ignore these paths in the state
+				// ignoredPaths: ["items.dates"],
+			},
+		}),
 });
