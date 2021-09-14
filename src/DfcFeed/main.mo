@@ -89,7 +89,7 @@ actor {
         return contentIds;
     };
 
-    public query func  getSatisfiedFeedContentIds(): async [Types.ContentId] {
+    public query func getSatisfiedFeedContentIds(): async [Types.ContentId] {
         var contentIds: [Types.ContentId] = [];
         for ((id, content) in satisfiedFeedMap.entries()){
             contentIds := Array.append<Types.ContentId>(contentIds, [content.id]);
