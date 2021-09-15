@@ -8,6 +8,12 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import FeedItem from "../components/FeedItem";
+import {
+	selectNeedsHelpFeed,
+	selectSatisfiedFeed,
+	setFeeds,
+} from "../reducers/feeds";
 
 function a11yProps(index) {
 	return {
@@ -26,6 +32,8 @@ const useStyles = makeStyles((theme) => ({
 const TabPanel = (props) => {
 	const { children, value, index, contents, ...other } = props;
 
+	let data = value === 0 ? contents.needsHelpFeed : contents.satisfiedFeed;
+
 	return (
 		<div
 			role="tabpanel"
@@ -33,30 +41,36 @@ const TabPanel = (props) => {
 			id={`simple-tabpanel-${index}`}
 			aria-labelledby={`simple-tab-${index}`}
 			{...other}
+			style={{
+				width: "100%",
+				justifyContent: "center",
+				alignItems: "center",
+				display: "flex",
+				flexDirection: "column",
+			}}
 		>
-			{value === index && (
-				<Box p={3}>
-					<Typography>THIS IS HERE</Typography>
-				</Box>
-			)}
+			{data.map((content) => (
+				<FeedItem feedItem={content} />
+			))}
+			{data.length === 0 ? <div>No data</div> : undefined}
 		</div>
 	);
 };
 
 const Page = () => {
 	const actors = useSelector(selectActors);
+	const needsHelpFeed = useSelector(selectNeedsHelpFeed);
+	const satisfiedFeed = useSelector(selectSatisfiedFeed);
 	const dispatch = useDispatch();
-	const [feed, setFeed] = React.useState({
-		needsHelpFeed: [],
-		satisfiedFeed: [],
-	});
-
 	React.useEffect(async () => {
-		console.log("this ran");
-		if (actors.DfcData && actors.DfcFeed) {
-			let feed = await getAllFeed(actors.DfcData, actors.DfcFeed);
-			console.log("got the feed");
-			setFeed(feed);
+		const { DfcData, DfcFeed } = await actors;
+		if (DfcData && DfcFeed) {
+			let { needsHelpFeed, satisfiedFeed } = await getAllFeed(
+				DfcData,
+				DfcFeed
+			);
+			console.log(needsHelpFeed, satisfiedFeed);
+			dispatch(setFeeds({ needsHelpFeed, satisfiedFeed }));
 		}
 	}, [actors]);
 
@@ -75,13 +89,20 @@ const Page = () => {
 					onChange={handleTabChange}
 					aria-label="simple tabs example"
 				>
-					<Tab label="Item One" {...a11yProps(0)} />
-					<Tab label="Item Two" {...a11yProps(1)} />
+					<Tab label="Needs Help" {...a11yProps(0)} />
+					<Tab label="Satisfied" {...a11yProps(1)} />
 				</Tabs>
 			</AppBar>
 			{/* pass in contents as array */}
-			<TabPanel value={value} index={0} contents={[]} />
-			<TabPanel value={value} index={1} contents={[]} />
+			<TabPanel
+				value={value}
+				contents={{ needsHelpFeed, satisfiedFeed }}
+			/>
+			{/* <TabPanel
+				value={value}
+				index={1}
+				contents={{ needsHelpFeed, satisfiedFeed }}
+			/> */}
 		</div>
 	);
 };

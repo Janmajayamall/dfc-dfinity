@@ -7,12 +7,15 @@ import Option "mo:base/Option";
 import Hash "mo:base/Hash";
 import Result "mo:base/Result";
 import Array "mo:base/Array";
+import Iter "mo:base/Iter";
 import DfcUsers "canister:DfcUsers";
 import Types "./../Shared/types";
 
 actor DfcData {
 
-    let contentMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Nat.equal, Hash.hash);
+    // stable var stableContentMap: [(Types.ContentId, Types.Content)] = []
+
+    var contentMap = HashMap.HashMap<Types.ContentId, Types.Content>(1, Nat.equal, Hash.hash);
     let contentCommentMap = HashMap.HashMap<Types.ContentId, HashMap.HashMap<Types.CommentId, Types.Comment>>(1, Nat.equal, Hash.hash);
     let commentRatingMap = HashMap.HashMap<Types.CommentId, HashMap.HashMap<Types.UserId, Types.Rating>>(1, Nat.equal, Hash.hash);
 
@@ -307,6 +310,15 @@ actor DfcData {
             s.callback(commentEvent);
         };
     };
+
+    // system func preupgrade() {
+    //     stableContentMap := Iter.toArray(contentMap.entries());
+    // };
+
+    // system func postupgrade() {
+    //     contentMap := Map.fromIter<Types.ContentId, Types.Content>(stableContentMap.vals(), 1, Text.equal, Text.hash);
+    // };
+
 
     // test functions for CandidUI
     public shared (msg) func getMyPrincipal(): async Principal {

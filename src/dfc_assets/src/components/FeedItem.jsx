@@ -7,14 +7,9 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-// import { dfc } from "../../declarations/dfc";
-import { Actor, HttpAgent } from "@dfinity/agent";
-import { idlFactory as dfc_idl, canisterId as dfc_id } from "dfx-generated/dfc";
 import Comment from "./Comment";
-import { colorScheme } from "../utils";
 
-const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
+const FeedItem = ({ feedItem }) => {
 	const [newComment, setNewComment] = React.useState("");
 
 	return (
@@ -23,7 +18,7 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 				margin: 10,
 				padding: 10,
 				width: 520,
-				backgroundColor: colorScheme.secondary,
+				backgroundColor: "#000000",
 			}}
 			elevation={14}
 			variant="outlined"
@@ -39,13 +34,13 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 				<Typography
 					variant="body2"
 					style={{
-						color: colorScheme.textPrimary,
+						color: "#ffffff",
 						fontWeight: "bold",
 					}}
-				>{`Tokens burnt - ${feedItem.content.burntTokens}`}</Typography>
+				>{`Tokens burnt - ${feedItem.tokensBurnt}`}</Typography>
 			</div>
 			<TweetEmbed
-				id={feedItem.content.contentIdentification.postId}
+				id={feedItem.url.split("/").pop()}
 				options={{
 					align: "center",
 					conversation: "none",
@@ -54,15 +49,7 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 			/>
 			<div>
 				{feedItem.comments.map((comment, index) => {
-					return (
-						<Comment
-							user={user}
-							comment={comment}
-							changeRating={changeRating}
-							ratings={feedItem.ratings2d[index]}
-							contentId={feedItem.contentId}
-						/>
-					);
+					return <Comment comment={comment} />;
 				})}
 				<div
 					style={{
@@ -93,13 +80,13 @@ const FeedItem = ({ user, feedItem, addNewComment, changeRating }) => {
 						color="primary"
 						style={{
 							// backgroundColor: colorScheme.primary,
-							color: colorScheme.textPrimary,
+							color: "#ffffff",
 						}}
 						onClick={() => {
 							if (newComment === "") {
 								return;
 							}
-							addNewComment(feedItem.contentId, newComment);
+							// addNewComment(feedItem.contentId, newComment);
 							setNewComment("");
 						}}
 					>

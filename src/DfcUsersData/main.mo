@@ -9,7 +9,6 @@ actor DfcUsersData {
     let usersDataMap = HashMap.HashMap<Types.UserId, UserDetails.UserDetails>(1, Principal.equal, Principal.hash);
 
     public shared func init(): async () {
-        //TODO restrict this to the controller of the canister
         DfcUsers.subscribeUserProfileEvents({
             callback = callbackForUserProfileEvent;
         });
@@ -48,18 +47,6 @@ actor DfcUsersData {
         };
         return usersData;
     };
-
-    // public shared func calculateAuthorScoreOfUser(userId: Types.UserId, authorScoresMap: Types.AuthorScoresMap): async Float {
-    //     switch(usersDataMap.get(userId)){
-    //         case(?userDetails){
-    //             let userAuthorScore = await userDetails.calculateAuthorScore(authorScoresMap);
-    //             return userAuthorScore;
-    //         };
-    //         case _ {
-    //             return 0.0;
-    //         };
-    //     };
-    // };
 
     // test functions for __Candid_UI
     public shared func testGetAllUsersComments(): async [{userId: Types.UserId; comments: [Types.Comment]}] {

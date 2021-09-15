@@ -25,3 +25,20 @@ dfx config --help
 2. enabled add content
 3. enabled add comment
 4. Enable upgradability
+
+
+// "dfc_assets": {
+		// 	"dependencies": [
+		// 		"DfcData",
+		// 		"DfcFeed",
+		// 		"DfcUsers",
+		// 		"DfcUsersData",
+		// 		"DfcReputationScorer",
+		// 		"DfcToken"
+		// 	],
+		// 	"frontend": {
+		// 		"entrypoint": "src/dfc_assets/src/index.html"
+		// 	},
+		// 	"source": ["src/dfc_assets/assets", "dist/dfc_assets/"],
+		// 	"type": "assets"
+		// }

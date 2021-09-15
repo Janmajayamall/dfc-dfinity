@@ -1,12 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const defaultFeedState = {
-	contents: [],
-};
-
 const initialState = {
-	needsHelpFeed: defaultFeedState,
-	satisfiedFeed: defaultFeedState,
+	needsHelpFeed: [],
+	satisfiedFeed: [],
 };
 
 const FEED_SELECTOR = {
@@ -86,12 +82,19 @@ export const feedsSlice = createSlice({
 			state.needsHelpFeed = updatedNeedsHelpFeed;
 			state.satisfiedFeed = updatedSatisfiedFeed;
 		},
+		setFeeds: (state, action) => {
+			const { needsHelpFeed, satisfiedFeed } = action.payload;
+			return (state = {
+				needsHelpFeed,
+				satisfiedFeed,
+			});
+		},
 	},
 });
 
 // Action creators are generated for each case reducer function
-export const { addContent, addCommentToContent } = feedsSlice.actions;
-export const selectNeedsHelpFeed = (state) => state.needsHelpFeed;
-export const selectSatisfiedFeed = (state) => state.satisfiedFeed;
+export const { addContent, addCommentToContent, setFeeds } = feedsSlice.actions;
+export const selectNeedsHelpFeed = (state) => state.feeds.needsHelpFeed;
+export const selectSatisfiedFeed = (state) => state.feeds.satisfiedFeed;
 
 export default feedsSlice.reducer;

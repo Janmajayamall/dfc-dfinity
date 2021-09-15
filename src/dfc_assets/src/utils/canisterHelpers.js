@@ -5,9 +5,8 @@ export async function flagNewContent(DfcData, args) {
 	return content;
 }
 
-export async function getContentDetailsInBatch(DfcData, args) {
-	const { contentIds } = args;
-	let contents = await DfcData.flagNewContent(contentIds);
+export async function getContentDetailsInBatch(DfcData, contentIds) {
+	let contents = await DfcData.getContentDetailsInBatch(contentIds);
 	return contents;
 }
 
@@ -43,4 +42,13 @@ export async function getAllFeed(DfcData, DfcFeed) {
 		),
 	};
 	return feed;
+}
+
+export async function getUserProfile(DfcUsers, userId) {
+	try {
+		let profile = await DfcUsers.getUserProfile(userId);
+		return profile;
+	} catch (e) {
+		return undefined;
+	}
 }

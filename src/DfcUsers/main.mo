@@ -10,9 +10,6 @@ actor DfcUsers {
 
     var userProfileEventSubscribers: [Types.SubscribeUserProfileEventsData] = [];
 
-    //TODO set of usernames to avoid duplication
-    
-
     public shared query func getUserProfile(userId: Types.UserId): async Result.Result<Types.Profile, Types.ProfileError> {
         switch (users.get(userId)){
             case (?profile){

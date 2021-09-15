@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
-let localCanisters, prodCanisters, canisters;
+let localCanisters, prodCanisters, canisters, network;
 
 function initCanisterIds() {
 	try {
@@ -24,18 +24,18 @@ function initCanisterIds() {
 		);
 	}
 
-	const network =
+	network =
 		process.env.DFX_NETWORK ||
 		(process.env.NODE_ENV === "production" ? "ic" : "local");
 
 	canisters = network === "local" ? localCanisters : prodCanisters;
-
 	for (const canister in canisters) {
 		process.env[canister.toUpperCase() + "_CANISTER_ID"] =
 			canisters[canister][network];
 	}
 }
 initCanisterIds();
+console.log(canisters["DfcData"][network]);
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 const asset_entry = path.join("src", "dfc_assets", "src", "index.html");
@@ -97,12 +97,13 @@ module.exports = {
 		}),
 		new webpack.EnvironmentPlugin({
 			NODE_ENV: "development",
-			DFC_DATA_ID: canisters["DfcData"],
-			DFC_USERS_ID: canisters["DfcUsers"],
-			DFC_USERS_DATA_ID: canisters["DfcUsersData"],
-			DFC_REPUTATION_SCORER_ID: canisters["DfcReputationScorer"],
-			DFC_FEED_ID: canisters["DfcFeed"],
-			DFC_TOKEN_ID: canisters["DfcToken"],
+			DFCDATA_CANISTER_ID: canisters["DfcData"][network],
+			DFCUSERS_CANISTER_ID: canisters["DfcUsers"][network],
+			DFCUSERSDATA_CANISTER_ID: canisters["DfcUsersData"][network],
+			DFCREPUTATIONSCORER_CANISTER_ID:
+				canisters["DfcReputationScorer"][network],
+			DFCFEED_CANISTER_ID: canisters["DfcFeed"][network],
+			DFCTOKEN_CANISTER_ID: canisters["DfcToken"][network],
 			II_URL: isDevelopment
 				? "http://localhost:8000?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai#authorize"
 				: "https://identity.ic0.app/#authorize",

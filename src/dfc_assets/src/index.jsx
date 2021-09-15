@@ -9,6 +9,7 @@ import { initActors } from "./reducers/actors";
 import { AuthClient } from "@dfinity/auth-client";
 import { selectAuth, updateAuthState } from "./reducers/auth";
 import TopBar from "./components/TopBar";
+import { getUserProfile } from "./utils/index";
 
 const Page = () => {
 	const [authState, setAuthState] = React.useState({});
@@ -22,6 +23,7 @@ const Page = () => {
 			updateAuthState({
 				authClient: authState.authClient,
 				isAuthenticated: authState.isAuthenticated,
+				profile: authState.profile,
 			})
 		);
 	}, [authState]);
@@ -29,14 +31,19 @@ const Page = () => {
 	React.useEffect(async () => {
 		AuthClient.create().then(async (client) => {
 			if (await client.isAuthenticated()) {
+				const profile = await getUserProfile(
+					client.getIdentity().getPrincipal()
+				);
 				setAuthState({
 					authClient: client,
 					isAuthenticated: true,
+					profile,
 				});
 			} else {
 				setAuthState({
 					authClient: client,
-					isAuthenticated: true,
+					isAuthenticated: false,
+					profile: undefined,
 				});
 			}
 			dispatch(
@@ -50,11 +57,20 @@ const Page = () => {
 	function login() {
 		authState.authClient?.login({
 			identityProvider: process.env.II_URL,
-			onSuccess: () => {
+			onSuccess: async () => {
+				const profile = await getUserProfile(
+					authState.authClient.getIdentity().getPrincipal()
+				);
 				setAuthState({
-					authClient: client,
+					authClient: authState.authClient,
 					isAuthenticated: true,
+					profile,
 				});
+				dispatch(
+					initActors({
+						identity: authState.authClient.getIdentity(),
+					})
+				);
 			},
 		});
 	}
@@ -63,6 +79,7 @@ const Page = () => {
 		return (
 			<div>
 				<TopBar authState={authState} login={login} />
+				<div style={{ marginTop: 5 }} />
 				<FeedScreen />
 			</div>
 		);

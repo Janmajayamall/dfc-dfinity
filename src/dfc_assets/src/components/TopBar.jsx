@@ -43,7 +43,11 @@ export default function TopBar({ authState, login }) {
 								<MenuIcon />
 							</IconButton>
 						) : (
-							<Typography variant="h6" color="inherit">
+							<Typography
+								onClick={login}
+								variant="h6"
+								color="inherit"
+							>
 								Login
 							</Typography>
 						)}

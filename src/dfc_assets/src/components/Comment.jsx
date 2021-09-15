@@ -9,25 +9,23 @@ import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Divider from "@material-ui/core/Divider";
-import { colorScheme } from "../utils";
 
-const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
+const Comment = ({ comment }) => {
 	let upRates = [];
 	let downRates = [];
 	let userRating = null; // null = no rate, true = up rate, false = down rate
-
 	function setRatings() {
 		// check user rating
-		userRating = ratings.find((rating) => rating.user.id === user.id);
+		// userRating = ratings.find((rating) => rating.user.id === user.id);
 
 		// up ratings
 		let upRatesL = [];
 		// down ratings
 		let downRatesL = [];
-		ratings.forEach(function (rating) {
-			if (rating.ratingValue === true) {
+		comment.ratings.forEach(function (rating) {
+			if (rating.rating === true) {
 				upRates.push(rating);
-			} else if (rating.ratingValue === false) {
+			} else if (rating.rating === false) {
 				downRates.push(rating);
 			}
 		});
@@ -35,15 +33,15 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 		downRates = downRatesL;
 	}
 
-	function getUserRating() {
-		// null = no rate, true = up rate, false = down rate
-		let userRating = ratings.find((rating) => rating.user.id === user.id);
-		return userRating ? userRating.ratingValue : null;
-	}
+	// function getUserRating() {
+	// 	// null = no rate, true = up rate, false = down rate
+	// 	let userRating = ratings.find((rating) => rating.user.id === user.id);
+	// 	return userRating ? userRating.ratingValue : null;
+	// }
 
 	function getRatesFor(ratingValue) {
-		let rates = ratings.filter(
-			(rating) => rating.ratingValue === ratingValue
+		let rates = comment.ratings.filter(
+			(rating) => rating.rating === ratingValue
 		);
 		return rates;
 	}
@@ -56,7 +54,7 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 				{ratingFor ? (
 					<IconButton
 						onClick={() => {
-							changeRating(contentId, comment.id, true);
+							// changeRating(contentId, comment.id, true);
 						}}
 					>
 						<div
@@ -68,15 +66,12 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 						>
 							<ArrowUpward
 								style={{
-									color:
-										getUserRating() === true
-											? colorScheme.red
-											: colorScheme.darkGrey,
+									color: "#a9a9a9",
 								}}
 							/>
 							<Typography
 								variant="body2"
-								style={{ color: colorScheme.textPrimary }}
+								style={{ color: "#ffffff" }}
 							>
 								{getRatesFor(ratingFor).length}
 							</Typography>
@@ -85,7 +80,7 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 				) : (
 					<IconButton
 						onClick={() => {
-							changeRating(contentId, comment.id, false);
+							// changeRating(contentId, comment.id, false);
 						}}
 					>
 						<div
@@ -97,16 +92,13 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 						>
 							<Typography
 								variant="body2"
-								style={{ color: colorScheme.textPrimary }}
+								style={{ color: "#ffffff" }}
 							>
 								{getRatesFor(ratingFor).length}
 							</Typography>
 							<ArrowDownward
 								style={{
-									color:
-										getUserRating() === false
-											? colorScheme.red
-											: colorScheme.darkGrey,
+									color: "#a9a9a9",
 								}}
 							/>
 						</div>
@@ -122,7 +114,7 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 			style={{
 				display: "flex",
 				flexDirection: "row",
-				backgroundColor: colorScheme.secondary,
+				backgroundColor: "#000000",
 			}}
 		>
 			<div
@@ -145,15 +137,12 @@ const Comment = ({ user, contentId, comment, ratings, changeRating }) => {
 					variant="body2"
 					style={{
 						fontWeight: "bold",
-						color: colorScheme.textPrimary,
+						color: "#ffffff",
 					}}
 				>
-					{comment.user.username}
+					{comment.username}
 				</Typography>
-				<Typography
-					variant="body2"
-					style={{ color: colorScheme.textPrimary }}
-				>
+				<Typography variant="body2" style={{ color: "#ffffff" }}>
 					{comment.text}
 				</Typography>
 			</div>

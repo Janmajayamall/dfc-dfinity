@@ -16,7 +16,6 @@ export const screenSlice = createSlice({
 	reducers: {
 		changeScreen: (state, action) => {
 			const to = action.payload;
-			console.log(to, " the calue id ");
 			state = {
 				...state,
 				screen: to,

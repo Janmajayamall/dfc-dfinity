@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const defaultState = {
 	isAuthenticated: false,
 	authClient: undefined,
-	sommethingNew: "d",
+	profile: undefined
 };
 
 const initialState = defaultState;
@@ -13,7 +13,7 @@ export const authSlice = createSlice({
 	initialState: initialState,
 	reducers: {
 		updateAuthState: (state, action) => {
-			const { authClient, isAuthenticated } = action.payload;
+			const { authClient, isAuthenticated, profile } = action.payload;
 			return (state = {
 				...state,
 				isAuthenticated,
