@@ -33,7 +33,7 @@ export default function TopBar({ authState, login }) {
 						{/* <Typography variant="h6" color="inherit">
 							Photos
 						</Typography> */}
-						{authState.isAuthenticated == true ? (
+						{true ? (
 							<IconButton
 								edge="end"
 								className={classes.menuButton}

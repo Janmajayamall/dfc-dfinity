@@ -1,3 +1,16 @@
+import {
+	canisterId as dfcDataCanisterId,
+	createActor as dfcDataCreateActor,
+} from "./../../../declarations/DfcData/index";
+import {
+	canisterId as dfcFeedCanisterId,
+	createActor as dfcFeedCreateActor,
+} from "./../../../declarations/DfcFeed/index";
+import {
+	canisterId as dfcUsersCanisterId,
+	createActor as dfcUsersCreateActor,
+} from "./../../../declarations/DfcUsers/index";
+
 // function related to DFC data
 export async function flagNewContent(DfcData, args) {
 	const { url, tokensBurnt } = args;
@@ -51,4 +64,23 @@ export async function getUserProfile(DfcUsers, userId) {
 	} catch (e) {
 		return undefined;
 	}
+}
+
+export function initActorsHelper(identity) {
+	// create actors
+	const DfcData = dfcDataCreateActor(dfcDataCanisterId, {
+		agentOptions: { identity },
+	});
+	const DfcFeed = dfcFeedCreateActor(dfcFeedCanisterId, {
+		agentOptions: { identity },
+	});
+	const DfcUsers = dfcUsersCreateActor(dfcUsersCanisterId, {
+		agentOptions: { identity },
+	});
+
+	return {
+		DfcData,
+		DfcFeed,
+		DfcUsers,
+	};
 }

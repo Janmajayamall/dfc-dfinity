@@ -1,78 +1,38 @@
-import * as React from "react";
+import { useEffect, useState } from "react";
 // import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import { render } from "react-dom";
 import store from "./store";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { selectScreen, changeScreen, SCREEN_SELECTOR } from "./reducers/screen";
 import FeedScreen from "./pages/FeedScreen";
-import { initActors } from "./reducers/actors";
 import { AuthClient } from "@dfinity/auth-client";
-import { selectAuth, updateAuthState } from "./reducers/auth";
+import auth, { selectAuth, updateAuthState } from "./reducers/auth";
 import TopBar from "./components/TopBar";
-import { getUserProfile } from "./utils/index";
+import { getUserProfile, initActorsHelper } from "./utils/index";
+import { useAuth } from "./hooks";
+import { init } from "../../declarations/DfcData/DfcData.did";
+import { initActorsState } from "./reducers/actors";
 
 const Page = () => {
-	const [authState, setAuthState] = React.useState({});
+	const { authClient, isAuthenticated, login, logout } = useAuth();
 
 	const screen = useSelector(selectScreen);
-	const globalAuthState = useSelector(selectAuth);
 	const dispatch = useDispatch();
 
-	React.useEffect(() => {
+	useEffect(() => {
 		dispatch(
 			updateAuthState({
-				authClient: authState.authClient,
-				isAuthenticated: authState.isAuthenticated,
-				profile: authState.profile,
+				isAuthenticated: isAuthenticated,
 			})
 		);
-	}, [authState]);
 
-	React.useEffect(async () => {
-		AuthClient.create().then(async (client) => {
-			if (await client.isAuthenticated()) {
-				const profile = await getUserProfile(
-					client.getIdentity().getPrincipal()
-				);
-				setAuthState({
-					authClient: client,
-					isAuthenticated: true,
-					profile,
-				});
-			} else {
-				setAuthState({
-					authClient: client,
-					isAuthenticated: false,
-					profile: undefined,
-				});
-			}
-			dispatch(
-				initActors({
-					identity: client.getIdentity(),
-				})
-			);
-		});
-	}, []);
+		identity = authClient.getIdentity();
+		initActors(identity);
+	}, [isAuthenticated]);
 
-	function login() {
-		authState.authClient?.login({
-			identityProvider: process.env.II_URL,
-			onSuccess: async () => {
-				const profile = await getUserProfile(
-					authState.authClient.getIdentity().getPrincipal()
-				);
-				setAuthState({
-					authClient: authState.authClient,
-					isAuthenticated: true,
-					profile,
-				});
-				dispatch(
-					initActors({
-						identity: authState.authClient.getIdentity(),
-					})
-				);
-			},
-		});
+	function initActors(identity) {
+		const actors = initActorsHelper(identity);
+		dispatch(initActorsState({ ...actors }));
 	}
 
 	if (screen === SCREEN_SELECTOR.main) {
