@@ -12,6 +12,7 @@ import { getUserProfile, initActorsHelper } from "./utils/index";
 import { useAuth } from "./hooks";
 import { init } from "../../declarations/DfcData/DfcData.did";
 import { initActorsState } from "./reducers/actors";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const Page = () => {
 	const { authClient, isAuthenticated, login, logout } = useAuth();
@@ -35,28 +36,35 @@ const Page = () => {
 		dispatch(initActorsState({ ...actors }));
 	}
 
-	if (screen === SCREEN_SELECTOR.main) {
-		return (
-			<div>
-				<TopBar authState={authState} login={login} />
-				<div style={{ marginTop: 5 }} />
-				<FeedScreen />
-			</div>
-		);
-	}
+	// if (screen === SCREEN_SELECTOR.main) {
+	// 	return (
+	// 		<div>
+	// 			<TopBar authState={authState} login={login} />
+	// 			<div style={{ marginTop: 5 }} />
+	// 			<FeedScreen />
+	// 		</div>
+	// 	);
+	// }
 
-	return <div />;
+	// return <div />;
 };
 
 const App = () => {
 	return (
 		<Provider store={store}>
-			<Page />
+			<ChakraProvider>
+				<FeedScreen />
+			</ChakraProvider>
 		</Provider>
 	);
 };
 
 render(<App />, document.getElementById("app"));
+
+// screens
+// 1. Feed Screen
+// 2. Flag modal
+// 3. Leaderboard screen
 
 // document.getElementById("clickMeBtn").addEventListener("click", async () => {
 // 	const name = document.getElementById("name").value.toString();

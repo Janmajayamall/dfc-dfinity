@@ -14,6 +14,7 @@ import {
 	selectSatisfiedFeed,
 	setFeeds,
 } from "../reducers/feeds";
+import { Grid, GridItem } from "@chakra-ui/react";
 
 function a11yProps(index) {
 	return {
@@ -83,6 +84,13 @@ const Page = () => {
 
 	return (
 		<div className={classes.root}>
+			<Grid templateColumns="repeat(5, 1fr)" gap={6}>
+				<Box w="100%" h="10" bg="blue.500" />
+				<Box w="100%" h="10" bg="blue.500" />
+				<Box w="100%" h="10" bg="blue.500" />
+				<Box w="100%" h="10" bg="blue.500" />
+				<Box w="100%" h="10" bg="blue.500" />
+			</Grid>
 			<AppBar position="static">
 				<Tabs
 					value={value}
