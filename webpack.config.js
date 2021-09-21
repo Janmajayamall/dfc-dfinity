@@ -104,7 +104,7 @@ module.exports = {
 				canisters["DfcReputationScorer"][network],
 			DFCFEED_CANISTER_ID: canisters["DfcFeed"][network],
 			DFCTOKEN_CANISTER_ID: canisters["DfcToken"][network],
-			II_URL: isDevelopment
+			II_URL: false
 				? "http://localhost:8000?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai#authorize"
 				: "https://identity.ic0.app/#authorize",
 		}),

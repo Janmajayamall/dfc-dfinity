@@ -15,13 +15,7 @@ import {
 	setFeeds,
 } from "../reducers/feeds";
 import { Grid, GridItem } from "@chakra-ui/react";
-
-function a11yProps(index) {
-	return {
-		id: `simple-tab-${index}`,
-		"aria-controls": `simple-tabpanel-${index}`,
-	};
-}
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -64,7 +58,7 @@ const Page = () => {
 	const satisfiedFeed = useSelector(selectSatisfiedFeed);
 	const dispatch = useDispatch();
 	React.useEffect(async () => {
-		const { DfcData, DfcFeed } = await actors;
+		const { DfcData, DfcFeed } = actors;
 		if (DfcData && DfcFeed) {
 			let { needsHelpFeed, satisfiedFeed } = await getAllFeed(
 				DfcData,
@@ -83,35 +77,25 @@ const Page = () => {
 	};
 
 	return (
-		<div className={classes.root}>
-			<Grid templateColumns="repeat(5, 1fr)" gap={6}>
-				<Box w="100%" h="10" bg="blue.500" />
-				<Box w="100%" h="10" bg="blue.500" />
-				<Box w="100%" h="10" bg="blue.500" />
-				<Box w="100%" h="10" bg="blue.500" />
-				<Box w="100%" h="10" bg="blue.500" />
-			</Grid>
-			<AppBar position="static">
-				<Tabs
-					value={value}
-					onChange={handleTabChange}
-					aria-label="simple tabs example"
-				>
-					<Tab label="Needs Help" {...a11yProps(0)} />
-					<Tab label="Satisfied" {...a11yProps(1)} />
-				</Tabs>
-			</AppBar>
-			{/* pass in contents as array */}
-			<TabPanel
-				value={value}
-				contents={{ needsHelpFeed, satisfiedFeed }}
-			/>
-			{/* <TabPanel
-				value={value}
-				index={1}
-				contents={{ needsHelpFeed, satisfiedFeed }}
-			/> */}
-		</div>
+		<Tabs>
+			<TabList>
+				<Tab>One</Tab>
+				<Tab>Two</Tab>
+				<Tab>Three</Tab>
+			</TabList>
+
+			<TabPanels>
+				<TabPanel>
+					<p>one!</p>
+				</TabPanel>
+				<TabPanel>
+					<p>two!</p>
+				</TabPanel>
+				<TabPanel>
+					<p>three!</p>
+				</TabPanel>
+			</TabPanels>
+		</Tabs>
 	);
 };
 
