@@ -13,7 +13,24 @@ import { getUserProfile, initActorsHelper } from "./utils/index";
 import { useAuth } from "./hooks";
 import { init } from "../../declarations/DfcData/DfcData.did";
 import { initActorsState } from "./reducers/actors";
-import { ChakraProvider } from "@chakra-ui/react";
+import {
+	ChakraProvider,
+	Stack,
+	HStack,
+	VStack,
+	Flex,
+	Button,
+	Spacer,
+	Tabs,
+	TabList,
+	TabPanels,
+	Tab,
+	TabPanel,
+	Box,
+	AspectRatio,
+	Text,
+} from "@chakra-ui/react";
+import TweetEmbed from "react-tweet-embed";
 
 const Page = () => {
 	const { authClient, isAuthenticated, login, logout } = useAuth();
@@ -54,7 +71,74 @@ const App = () => {
 	return (
 		<Provider store={store}>
 			<ChakraProvider>
-				<FeedScreen />
+				<VStack
+					spacing={4}
+					align="stretch"
+					h="100vh"
+					bg="gray.800"
+					color="white"
+				>
+					<Flex p="5">
+						<Spacer />
+						<Button colorScheme="teal" variant="solid">
+							Login
+						</Button>
+					</Flex>
+					<Tabs>
+						<TabList>
+							<Tab>Needs Help</Tab>
+							<Tab>Satisfied</Tab>
+						</TabList>
+
+						<TabPanels>
+							<TabPanel>
+								<Flex flexDirection="column">
+									<TweetEmbed
+										id={"1440753048020602881"}
+										options={{
+											align: "center",
+											conversation: "none",
+											theme: "dark",
+										}}
+									/>
+									<Flex>
+										<Spacer />
+										<Box
+											borderWidth="1px"
+											borderRadius="lg"
+											w="520px"
+											p="5"
+										>
+											<Text
+												color="white"
+												noOfLines={10}
+												fontSize="sm"
+												fontWeight="semibold"
+											>
+												Username
+											</Text>
+											<Text
+												color="white"
+												noOfLines={10}
+												fontSize="sm"
+											>
+												Lorem ipsum is placeholder text
+												commonly used in the graphic,
+												print, and publishing industries
+												for previewing layouts and
+												visual mockups.
+											</Text>
+										</Box>
+										<Spacer />
+									</Flex>
+								</Flex>
+							</TabPanel>
+							<TabPanel>
+								<p>two!</p>
+							</TabPanel>
+						</TabPanels>
+					</Tabs>
+				</VStack>
 			</ChakraProvider>
 		</Provider>
 	);
