@@ -29,8 +29,19 @@ import {
 	Box,
 	AspectRatio,
 	Text,
+	IconButton,
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalFooter,
+	ModalBody,
+	ModalCloseButton,
+	useDisclosure,
+	Input,
 } from "@chakra-ui/react";
 import TweetEmbed from "react-tweet-embed";
+import { ArrowUpIcon, ArrowDownIcon, AddIcon } from "@chakra-ui/icons";
 
 const Page = () => {
 	const { authClient, isAuthenticated, login, logout } = useAuth();
@@ -67,7 +78,44 @@ const Page = () => {
 	// return <div />;
 };
 
+let testObj = {
+	username: "aiowda",
+	comment:
+		"Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.",
+};
+let testList = [testObj, testObj];
+
 const App = () => {
+	const { isOpen, onOpen, onClose } = useDisclosure();
+
+	function Leaderboard() {}
+
+	function NewContentModal() {
+		return (
+			<Modal isOpen={isOpen} onClose={onClose}>
+				<ModalOverlay />
+				<ModalContent bg="gray.800" color="white">
+					<ModalHeader>Flag new content</ModalHeader>
+					<ModalCloseButton />
+					<Box w="100%" p="5" justifyContent="center">
+						<Input placeholder="Tweet URL" size="md" w="90%" />
+						<Input
+							mt="2"
+							placeholder="Tokens to burn"
+							size="md"
+							w="90%"
+						/>
+					</Box>
+					<ModalFooter>
+						<Button colorScheme="blue" mr={3} onClick={onClose}>
+							Add
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+		);
+	}
+
 	return (
 		<Provider store={store}>
 			<ChakraProvider>
@@ -81,10 +129,16 @@ const App = () => {
 					<Flex p="5">
 						<Spacer />
 						<Button colorScheme="teal" variant="solid">
+							Home
+						</Button>
+						<Button colorScheme="teal" variant="solid">
+							Leaderboard
+						</Button>
+						<Button colorScheme="teal" variant="solid">
 							Login
 						</Button>
 					</Flex>
-					<Tabs>
+					<Tabs isFitted variant="enclosed">
 						<TabList>
 							<Tab>Needs Help</Tab>
 							<Tab>Satisfied</Tab>
@@ -93,14 +147,14 @@ const App = () => {
 						<TabPanels>
 							<TabPanel>
 								<Flex flexDirection="column">
-									<TweetEmbed
+									{/* <TweetEmbed
 										id={"1440753048020602881"}
 										options={{
 											align: "center",
 											conversation: "none",
 											theme: "dark",
 										}}
-									/>
+									/> */}
 									<Flex>
 										<Spacer />
 										<Box
@@ -109,25 +163,64 @@ const App = () => {
 											w="520px"
 											p="5"
 										>
-											<Text
-												color="white"
-												noOfLines={10}
-												fontSize="sm"
-												fontWeight="semibold"
-											>
-												Username
-											</Text>
-											<Text
-												color="white"
-												noOfLines={10}
-												fontSize="sm"
-											>
-												Lorem ipsum is placeholder text
-												commonly used in the graphic,
-												print, and publishing industries
-												for previewing layouts and
-												visual mockups.
-											</Text>
+											{testList.map((obj) => {
+												return (
+													<Box marginBottom="4">
+														<Text
+															color="white"
+															noOfLines={10}
+															fontSize="sm"
+															fontWeight="semibold"
+														>
+															{obj.username}
+														</Text>
+														<Flex
+															justifyContent="center"
+															mu="2"
+														>
+															<Box mr="2">
+																<IconButton
+																	colorScheme="teal"
+																	aria-label="Call Segun"
+																	size="sm"
+																	icon={
+																		<ArrowUpIcon
+																			w={
+																				6
+																			}
+																			h={
+																				6
+																			}
+																		/>
+																	}
+																/>
+																<IconButton
+																	colorScheme="teal"
+																	aria-label="Call Segun"
+																	size="sm"
+																	icon={
+																		<ArrowDownIcon
+																			w={
+																				6
+																			}
+																			h={
+																				6
+																			}
+																		/>
+																	}
+																/>
+															</Box>
+															<Text
+																color="white"
+																noOfLines={10}
+																fontSize="sm"
+															>
+																{obj.comment}
+															</Text>
+														</Flex>
+													</Box>
+												);
+											})}
 										</Box>
 										<Spacer />
 									</Flex>
@@ -138,7 +231,19 @@ const App = () => {
 							</TabPanel>
 						</TabPanels>
 					</Tabs>
+					<Spacer />
+					<Flex p="5">
+						<Spacer />
+						<IconButton
+							onClick={onOpen}
+							colorScheme="teal"
+							aria-label="Call Segun"
+							size="md"
+							icon={<AddIcon w={6} h={6} />}
+						/>
+					</Flex>
 				</VStack>
+				<NewContentModal />
 			</ChakraProvider>
 		</Provider>
 	);
